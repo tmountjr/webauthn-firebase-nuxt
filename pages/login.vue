@@ -21,18 +21,23 @@
         </b-button>
       </div>
     </b-form>
+    <Credentials v-if="isLoggedIn" />
   </b-container>
 </template>
 
 <script>
 // <!-- eslint-disable no-console -->
 import { mapState, mapGetters } from 'vuex'
+import Credentials from '~/components/Credentials.vue'
 
 const base64Encode = str => Buffer.from(str).toString('base64')
 // const base64Decode = str => Buffer.from(str, 'base64').toString('utf-8')
 
 export default {
   name: 'LoginPage',
+  components: {
+    Credentials
+  },
   data () {
     return {
       email: '',
