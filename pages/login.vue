@@ -1,24 +1,22 @@
 <template>
   <b-container class="login">
     <b-form>
-      <b-form-group id="email-group" label="Enter your email:" label-for="email">
-        <b-form-input id="email" v-model="email" type="text" placeholder="Email Address" required />
-      </b-form-group>
-      <b-form-group v-if="currentStage === 'email'" id="email-continue-group">
-        <b-button @click.prevent="checkemail">
-          Continue
-        </b-button>
-      </b-form-group>
+      <div>
+        <b-form-group id="email-group" label="Enter your email:" label-for="email">
+          <b-form-input id="email" v-model="email" type="text" placeholder="Email Address" required />
+        </b-form-group>
+        <b-form-group v-if="currentStage === 'email'" id="email-continue-group">
+          <b-button @click.prevent="checkEmail">
+            Continue
+          </b-button>
+        </b-form-group>
+      </div>
 
       <div v-if="currentStage === 'password'">
-        <b-form-group
-          id="password-group"
-          label="Enter your password:"
-          label-for="password"
-        >
+        <b-form-group id="password-group" label="Enter your password:" label-for="password">
           <b-form-input id="password" v-model="password" type="password" placeholder="Password" required />
         </b-form-group>
-        <b-button type="submit">
+        <b-button @click.prevent="userLogin">
           {{ submitButton }}
         </b-button>
       </div>
@@ -27,6 +25,7 @@
 </template>
 
 <script>
+// <!-- eslint-disable no-console -->
 import { mapState, mapGetters } from 'vuex'
 
 const base64Encode = str => Buffer.from(str).toString('base64')
@@ -65,7 +64,6 @@ export default {
         try {
           user = await this.$fire.auth.signInWithEmailAndPassword(this.email, this.password)
         } catch (e) {
-          // eslint-disable-next-line no-console
           console.error('error while signing in', e)
         }
       } else {
@@ -82,14 +80,13 @@ export default {
           const dbMetaRef = this.$fire.database.ref(`users/${firebaseUid}`)
           await dbMetaRef.set({ email: this.email })
         } catch (e) {
-          // eslint-disable-next-line no-console
           console.error('error while creating new account', e)
         }
       }
     },
-    async checkemail () {
-      const emailKey = base64Encode(this.email).replace(/=+$/g, '')
-      const ref = this.$fire.database.ref(`map/${emailKey}`)
+    async checkEmail () {
+      const mapKey = base64Encode(this.email).replace(/=+$/g, '')
+      const ref = this.$fire.database.ref(`map/${mapKey}`)
       try {
         const snapshot = await ref.once('value')
         this.firebaseUID = snapshot.val()
@@ -98,7 +95,6 @@ export default {
         }
         this.currentStage = 'password'
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error(e)
       }
     }
