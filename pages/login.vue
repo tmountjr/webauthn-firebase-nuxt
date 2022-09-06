@@ -57,6 +57,15 @@ export default {
         : 'Create Account'
     }
   },
+  beforeMount () {
+    const currentUser = this.$fire.auth._delegate.currentUser
+    if (currentUser) {
+      this.email = currentUser.email
+      this.currentStage = 'password'
+      this.firebaseUID = currentUser.uid
+      this.emailExists = true
+    }
+  },
   methods: {
     async userLogin () {
       let user

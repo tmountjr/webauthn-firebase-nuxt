@@ -39,8 +39,7 @@ export default {
     'bootstrap-vue/nuxt',
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
-    '@nuxtjs/firebase',
-    'cookie-universal-nuxt'
+    '@nuxtjs/firebase'
   ],
 
   firebase: {
