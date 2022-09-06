@@ -1,12 +1,11 @@
-<!-- eslint-disable no-console -->
 <template>
   <b-container class="login">
-    <b-form @submit.prevent="userLogin">
-      <b-form-group id="username-group" label="Enter your username:" label-for="username">
-        <b-form-input id="username" v-model="username" type="text" placeholder="Username" required />
+    <b-form>
+      <b-form-group id="email-group" label="Enter your email:" label-for="email">
+        <b-form-input id="email" v-model="email" type="text" placeholder="Email Address" required />
       </b-form-group>
-      <b-form-group v-if="currentStage === 'username'" id="username-continue-group">
-        <b-button @click.prevent="continueLogin">
+      <b-form-group v-if="currentStage === 'email'" id="email-continue-group">
+        <b-button @click.prevent="checkemail">
           Continue
         </b-button>
       </b-form-group>
@@ -20,7 +19,7 @@
           <b-form-input id="password" v-model="password" type="password" placeholder="Password" required />
         </b-form-group>
         <b-button type="submit">
-          Log In
+          {{ submitButton }}
         </b-button>
       </div>
     </b-form>
@@ -37,51 +36,69 @@ export default {
   name: 'LoginPage',
   data () {
     return {
-      username: '',
+      email: '',
       password: '',
-      currentStage: 'username',
+      currentStage: 'email',
       firebaseUID: '',
-      usernameExists: false
+      emailExists: false
     }
   },
   computed: {
     ...mapState({
-      authUser: state => state.authUser
+      authUser: state => state.authUser,
+      idToken: state => state.idToken
     }),
     ...mapGetters({
-      isLoggedIn: 'isLoggedIn'
-    })
+      isLoggedIn: 'isLoggedIn',
+      idToken: 'idToken'
+    }),
+    submitButton () {
+      return this.emailExists
+        ? 'Log In'
+        : 'Create Account'
+    }
   },
   methods: {
     async userLogin () {
-      if (this.usernameExists) {
+      let user
+      if (this.emailExists) {
         try {
-          const user = await this.$fire.auth.signInWithEmailAndPassword(this.username, this.password)
-          console.log('logged in ', user)
+          user = await this.$fire.auth.signInWithEmailAndPassword(this.email, this.password)
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error('error while signing in', e)
         }
       } else {
         try {
-          const user = await this.$fire.auth.createUserWithEmailAndPassword(this.username, this.password)
-          console.log('created ', user)
-          // Once this is done
+          user = await this.$fire.auth.createUserWithEmailAndPassword(this.email, this.password)
+          const firebaseUid = user.user.uid
+
+          // Once this is done, create metadata on firebase
+          const mapKey = base64Encode(this.email).replace(/=+$/g, '')
+
+          const dbMapRef = this.$fire.database.ref(`map/${mapKey}`)
+          await dbMapRef.set(firebaseUid)
+
+          const dbMetaRef = this.$fire.database.ref(`users/${firebaseUid}`)
+          await dbMetaRef.set({ email: this.email })
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error('error while creating new account', e)
         }
       }
     },
-    async continueLogin () {
-      const usernameKey = base64Encode(this.username).replace(/=+$/g, '')
-      const ref = this.$fire.database.ref(`map/${usernameKey}`)
+    async checkemail () {
+      const emailKey = base64Encode(this.email).replace(/=+$/g, '')
+      const ref = this.$fire.database.ref(`map/${emailKey}`)
       try {
         const snapshot = await ref.once('value')
         this.firebaseUID = snapshot.val()
         if (this.firebaseUID) {
-          this.usernameExists = true
-          this.currentStage = 'password'
+          this.emailExists = true
         }
+        this.currentStage = 'password'
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error(e)
       }
     }

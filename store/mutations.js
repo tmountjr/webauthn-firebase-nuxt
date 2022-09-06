@@ -10,5 +10,9 @@ export default {
       uid: authUser.uid,
       email: authUser.email
     }
+  },
+
+  SET_AUTH_TOKEN: (state, idToken) => {
+    state.idToken = idToken
   }
 }

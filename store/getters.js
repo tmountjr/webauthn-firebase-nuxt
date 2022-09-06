@@ -5,5 +5,6 @@ export default {
     } catch {
       return false
     }
-  }
+  },
+  idToken: state => state.idToken
 }
