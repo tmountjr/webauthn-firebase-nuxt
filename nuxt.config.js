@@ -33,6 +33,10 @@ export default {
     '@nuxtjs/eslint-module'
   ],
 
+  bootstrapVue: {
+    icons: true
+  },
+
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/bootstrap

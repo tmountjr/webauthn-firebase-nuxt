@@ -11,8 +11,11 @@
     <div v-else>
       <p>Here are your credentials:</p>
       <ul>
-        <li v-for="cred in credentials" :key="cred.publicKey">
-          Public Key: {{ cred.publicKey }}
+        <li v-for="cred in credentials" :key="cred.credId">
+          Public Key: {{ cred.credId }}
+          <b-button variant="danger" @click="deleteCredential(cred.credId)">
+            <b-icon icon="trash" />
+          </b-button>
         </li>
       </ul>
     </div>
@@ -83,20 +86,40 @@ export default {
 
       window.localStorage.setItem('credId', credential.id)
 
-      const userResp = await registerResponse({
-        user: { ...this.authUser, credentials: this.credentials },
-        credential
-      })
+      try {
+        const userResp = await registerResponse({
+          user: { ...this.authUser, credentials: this.credentials },
+          credential
+        })
 
-      const credRef = this.$fire.database.ref(`users/${this.authUser.uid}/credentials`)
-      await credRef.set(userResp.credentials)
-      await this.readFirebaseCredentials()
+        this.credentials = userResp.credentials
+        await this.writeFirebaseCredentials()
+        await this.readFirebaseCredentials()
+      } catch (e) {
+        console.error(e)
+      }
     },
     async readFirebaseCredentials () {
       const ref = this.$fire.database.ref(`users/${this.authUser.uid}/credentials`)
       const snapshot = await ref.once('value')
       const credentials = snapshot.val()
       this.credentials = credentials || []
+    },
+    async writeFirebaseCredentials () {
+      const ref = this.$fire.database.ref(`users/${this.authUser.uid}/credentials`)
+      await ref.set(this.credentials)
+    },
+    async deleteCredential (credId) {
+      // Read in the latest from firebase, remove the one we want to remove, and
+      // push back to firebase.
+      await this.readFirebaseCredentials()
+      this.credentials = this.credentials.filter(cred => cred.credId !== credId)
+      await this.writeFirebaseCredentials()
+      // Check local storage too, just to make sure
+      const localCredId = window.localStorage.getItem('credId')
+      if (credId === localCredId) {
+        window.localStorage.removeItem('credId')
+      }
     }
   }
 }
