@@ -21,7 +21,7 @@
         </b-button>
       </div>
     </b-form>
-    <Credentials v-if="isLoggedIn" />
+    <Credentials v-if="isLoggedIn && uvpaAvailable" />
   </b-container>
 </template>
 
@@ -31,7 +31,6 @@ import { mapState, mapGetters } from 'vuex'
 import Credentials from '~/components/Credentials.vue'
 
 const base64Encode = str => Buffer.from(str).toString('base64')
-// const base64Decode = str => Buffer.from(str, 'base64').toString('utf-8')
 
 export default {
   name: 'LoginPage',
@@ -44,7 +43,8 @@ export default {
       password: '',
       currentStage: 'email',
       firebaseUID: '',
-      emailExists: false
+      emailExists: false,
+      uvpaAvailable: false
     }
   },
   computed: {
@@ -77,6 +77,7 @@ export default {
       if (this.emailExists) {
         try {
           user = await this.$fire.auth.signInWithEmailAndPassword(this.email, this.password)
+          await this.refreshUvpa()
         } catch (e) {
           console.error('error while signing in', e)
         }
@@ -93,6 +94,7 @@ export default {
 
           const dbMetaRef = this.$fire.database.ref(`users/${firebaseUid}`)
           await dbMetaRef.set({ email: this.email })
+          await this.refreshUvpa()
         } catch (e) {
           console.error('error while creating new account', e)
         }
@@ -108,8 +110,15 @@ export default {
           this.emailExists = true
         }
         this.currentStage = 'password'
+        await this.refreshUvpa()
       } catch (e) {
         console.error(e)
+      }
+    },
+    async refreshUvpa () {
+      if (window?.PublicKeyCredential) {
+        const uvpa = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+        this.uvpaAvailable = uvpa
       }
     }
   }

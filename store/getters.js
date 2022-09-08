@@ -6,5 +6,8 @@ export default {
       return false
     }
   },
-  idToken: state => state.idToken
+  idToken: state => state.idToken,
+  authUser: (state) => {
+    return state.authUser
+  }
 }

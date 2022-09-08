@@ -71,5 +71,14 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
+    babel: {
+      compact: process.env.NODE_ENV !== 'development',
+      sourceRoot: __dirname
+    },
+    extend (config, { isClient }) {
+      if (process.env.NODE_ENV !== 'development') {
+        config.devtool = isClient ? 'source-map' : 'inline-source-map'
+      }
+    }
   }
 }
