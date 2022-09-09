@@ -77,7 +77,7 @@ export default {
       }
 
       // fetch /auth/signinResponse with credential
-      const resp = signinResponse({
+      const resp = await signinResponse({
         user: { ...this.authUser, credentials: this.credentials },
         credentialObject: credential
       })
