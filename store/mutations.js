@@ -14,5 +14,9 @@ export default {
 
   SET_AUTH_TOKEN: (state, idToken) => {
     state.idToken = idToken
+  },
+
+  SET_CREDENTIALS: (state, credentials) => {
+    state.credentials = credentials
   }
 }

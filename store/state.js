@@ -1,4 +1,5 @@
 export default () => ({
   authUser: null,
-  idToken: null
+  idToken: null,
+  credentials: []
 })

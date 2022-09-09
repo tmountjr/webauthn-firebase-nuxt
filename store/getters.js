@@ -9,5 +9,8 @@ export default {
   idToken: state => state.idToken,
   authUser: (state) => {
     return state.authUser
+  },
+  credentials: (state) => {
+    return state.credentials
   }
 }

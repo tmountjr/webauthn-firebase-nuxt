@@ -20,7 +20,8 @@
       <p>Here are your credentials:</p>
       <ul>
         <li v-for="cred in credentials" :key="cred.credId">
-          Credential ID: {{ cred.credId }}
+          Credential ID: {{ cred.credId.slice(0, 8) }}... <br>
+          Credential Name: {{ cred.credentialName }} <br>
           <b-button variant="danger" @click="deleteCredential(cred.credId)">
             <b-icon icon="trash" />
           </b-button>
@@ -31,7 +32,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { registerCredential, registerResponse } from '@/lib/auth'
 
 export default {
@@ -45,22 +46,23 @@ export default {
     }
   },
   data: () => ({
-    credentials: [],
     newCredentialName: '',
     showNewCredential: false
   }),
-  async fetch () {
-    await this.readFirebaseCredentials()
-  },
   computed: {
     ...mapState({
-      authUser: state => state.authUser
+      authUser: state => state.authUser,
+      credentials: state => state.credentials
     }),
     hasCredentials () {
       return this.credentials.length > 0
     }
   },
   methods: {
+    ...mapActions({
+      createCredential: 'createCredential',
+      deleteFirebaseCredential: 'deleteCredential'
+    }),
     showCredentialName () {
       this.newCredentialName = ''
       this.showNewCredential = true
@@ -78,16 +80,15 @@ export default {
       window.localStorage.setItem('credId', cred.id)
 
       try {
-        const userResp = await registerResponse({
+        const newCredential = await registerResponse({
           user: { ...this.authUser, credentials: this.credentials },
           rawCredential: cred,
           credentialName: this.newCredentialName
         })
-
-        this.credentials = userResp.credentials
-        debugger
-        await this.writeFirebaseCredentials()
-        await this.readFirebaseCredentials()
+        // userResp.credentials contains what should be the new list of credentials.
+        if (newCredential) {
+          await this.createCredential(newCredential)
+        }
       } catch (e) {
         console.error(e)
       } finally {
@@ -95,22 +96,9 @@ export default {
         this.showNewCredential = false
       }
     },
-    async readFirebaseCredentials () {
-      const ref = this.$fire.database.ref(`users/${this.authUser.uid}/credentials`)
-      const snapshot = await ref.once('value')
-      const credentials = snapshot.val()
-      this.credentials = credentials || []
-    },
-    async writeFirebaseCredentials () {
-      const ref = this.$fire.database.ref(`users/${this.authUser.uid}/credentials`)
-      await ref.set(this.credentials)
-    },
     async deleteCredential (credId) {
-      // Read in the latest from firebase, remove the one we want to remove, and
-      // push back to firebase.
-      await this.readFirebaseCredentials()
-      this.credentials = this.credentials.filter(cred => cred.credId !== credId)
-      await this.writeFirebaseCredentials()
+      await this.deleteFirebaseCredential(credId)
+
       // Check local storage too, just to make sure
       const localCredId = window.localStorage.getItem('credId')
       if (credId === localCredId) {
