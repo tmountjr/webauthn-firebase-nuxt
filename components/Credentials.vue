@@ -2,9 +2,17 @@
   <div class="credentials">
     <hr>
     <h1>Credentials</h1>
-    <b-button @click="startRegisterCredential">
+    <b-button @click="showCredentialName">
       Add Credential
     </b-button>
+    <b-input-group v-if="showNewCredential">
+      <b-form-input v-model="newCredentialName" />
+      <b-input-group-append>
+        <b-button @click="startRegisterCredential">
+          Register Credential
+        </b-button>
+      </b-input-group-append>
+    </b-input-group>
     <div v-if="!hasCredentials">
       <p>No credentials stored.</p>
     </div>
@@ -36,11 +44,11 @@ export default {
       }
     }
   },
-  data () {
-    return {
-      credentials: []
-    }
-  },
+  data: () => ({
+    credentials: [],
+    newCredentialName: '',
+    showNewCredential: false
+  }),
   async fetch () {
     await this.readFirebaseCredentials()
   },
@@ -53,6 +61,10 @@ export default {
     }
   },
   methods: {
+    showCredentialName () {
+      this.newCredentialName = ''
+      this.showNewCredential = true
+    },
     async startRegisterCredential () {
       // Get information that the device needs to create credentials.
       const options = registerCredential({
@@ -68,14 +80,19 @@ export default {
       try {
         const userResp = await registerResponse({
           user: { ...this.authUser, credentials: this.credentials },
-          rawCredential: cred
+          rawCredential: cred,
+          credentialName: this.newCredentialName
         })
 
         this.credentials = userResp.credentials
+        debugger
         await this.writeFirebaseCredentials()
         await this.readFirebaseCredentials()
       } catch (e) {
         console.error(e)
+      } finally {
+        this.newCredentialName = ''
+        this.showNewCredential = false
       }
     },
     async readFirebaseCredentials () {
