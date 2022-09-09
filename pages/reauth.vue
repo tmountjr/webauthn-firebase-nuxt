@@ -3,6 +3,7 @@
     <b-button :disabled="reauthUnavailable" @click="startReauth">
       Start Reauth
     </b-button>
+    <CredentialPicker v-if="showCredentialPicker" class="mt-2" />
   </b-container>
 </template>
 
@@ -10,18 +11,20 @@
 import base64url from 'base64url'
 import { mapState, mapGetters } from 'vuex'
 import { signinRequest, signinResponse } from '@/lib/auth'
+import CredentialPicker from '@/components/CredentialPicker.vue'
 
 export default {
   name: 'ReauthPage',
-  data: () => ({
-    credentials: []
-  }),
-  async fetch () {
-    await this.readFirebaseCredentials()
+  components: {
+    CredentialPicker
   },
+  data: () => ({
+    showCredentialPicker: false
+  }),
   computed: {
     ...mapState({
-      authUser: state => state.authUser
+      authUser: state => state.authUser,
+      credentials: state => state.credentials
     }),
     ...mapGetters({
       isLoggedIn: 'isLoggedIn'
@@ -32,7 +35,11 @@ export default {
   },
   methods: {
     async startReauth () {
-      const credId = localStorage.getItem('credId')
+      const credId = window.localStorage.getItem('credId')
+
+      if (!credId) {
+        this.showCredentialPicker = true
+      }
 
       // Fetch /auth/signinRequest
       const options = signinRequest({
@@ -86,11 +93,6 @@ export default {
       } else {
         alert('authentication succeeded')
       }
-    },
-    async readFirebaseCredentials () {
-      const ref = this.$fire.database.ref(`users/${this.authUser.uid}/credentials`)
-      const snapshot = await ref.once('value')
-      this.credentials = snapshot.val() || []
     }
   }
 }
