@@ -12,7 +12,7 @@
       <p>Here are your credentials:</p>
       <ul>
         <li v-for="cred in credentials" :key="cred.credId">
-          Public Key: {{ cred.credId }}
+          Credential ID: {{ cred.credId }}
           <b-button variant="danger" @click="deleteCredential(cred.credId)">
             <b-icon icon="trash" />
           </b-button>
@@ -24,7 +24,6 @@
 
 <script>
 import { mapState } from 'vuex'
-import base64url from 'base64url'
 import { registerCredential, registerResponse } from '@/lib/auth'
 
 export default {
@@ -55,41 +54,21 @@ export default {
   },
   methods: {
     async startRegisterCredential () {
+      // Get information that the device needs to create credentials.
       const options = registerCredential({
         user: this.authUser,
         credentials: this.credentials
       })
 
-      options.user.id = base64url.toBuffer(options.user.id)
-      options.challenge = base64url.toBuffer(options.challenge)
-
-      if (options.excludeCredentials) {
-        for (const cred of options.excludeCredentials) {
-          cred.id = base64url.toBuffer(cred.id)
-        }
-      }
-
       const cred = await window.navigator.credentials.create({ publicKey: options })
-      const credential = {}
-      credential.id = cred.id
-      credential.rawId = base64url.encode(cred.rawId)
-      credential.type = cred.type
 
-      if (cred.response) {
-        const clientDataJSON = base64url.encode(cred.response.clientDataJSON)
-        const attestationObject = base64url.encode(cred.response.attestationObject)
-        credential.response = {
-          clientDataJSON,
-          attestationObject
-        }
-      }
-
-      window.localStorage.setItem('credId', credential.id)
+      // Save the credential locally.
+      window.localStorage.setItem('credId', cred.id)
 
       try {
         const userResp = await registerResponse({
           user: { ...this.authUser, credentials: this.credentials },
-          credential
+          rawCredential: cred
         })
 
         this.credentials = userResp.credentials
