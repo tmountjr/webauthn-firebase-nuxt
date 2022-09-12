@@ -1,8 +1,8 @@
 <template>
   <b-card title="Please sign in">
-    <b-alert :show="errorState" dismissible :variant="errorLevel" @dismissed="alertDismissed">
+    <MiniAlert v-if="errorState" :error-level="errorLevel" @mini-alert-dismissed="alertDismissed">
       {{ errorText }}
-    </b-alert>
+    </MiniAlert>
     <b-form-group>
       <b-form-input id="email" v-model="email" placeholder="Enter email address" type="email" @blur="checkEmail" />
       <b-form-input id="pasword" v-model="password" placeholder="Enter password" type="password" />
@@ -18,9 +18,13 @@
 <script>
 import { mapState } from 'vuex'
 import base64url from 'base64url'
+import MiniAlert from '@/components/MiniAlert.vue'
 
 export default {
   name: 'NewLoginPage',
+  components: {
+    MiniAlert
+  },
   layout: 'login',
   data: () => ({
     email: '',
