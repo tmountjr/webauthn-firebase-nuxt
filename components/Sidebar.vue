@@ -1,7 +1,9 @@
 <template>
   <div class="sidebar pt-4 d-flex flex-column">
     <b-nav class="d-flex flex-column">
-      <b-nav-item to="/"><b-icon icon="house-door" />Dashboard</b-nav-item>
+      <b-nav-item to="/">
+        <b-icon icon="house-door" />Dashboard
+      </b-nav-item>
       <b-nav-item><b-icon icon="clipboard-data" />Reports</b-nav-item>
       <b-nav-item><b-icon icon="stack" />Integrations</b-nav-item>
     </b-nav>
@@ -9,8 +11,12 @@
       User Settings
     </p>
     <b-nav class="d-flex flex-column">
-      <b-nav-item><b-icon icon="person" />Public Profile</b-nav-item>
-      <b-nav-item><b-icon icon="shield-lock" />Private Settings</b-nav-item>
+      <b-nav-item to="/profile">
+        <b-icon icon="person" />Public Profile
+      </b-nav-item>
+      <b-nav-item to="/settings">
+        <b-icon icon="shield-lock" />Private Settings
+      </b-nav-item>
     </b-nav>
   </div>
 </template>

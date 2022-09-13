@@ -4,6 +4,13 @@
 
 <script>
 export default {
-  name: 'IndexPage'
+  name: 'IndexPage',
+  async asyncData ({ $content, $axios }) {
+    const schwarberContentUrl = $content('/schwarber').url
+    const schwarberContent = await $axios.get(schwarberContentUrl)
+    return {
+      schwarber: schwarberContent.data.body
+    }
+  }
 }
 </script>

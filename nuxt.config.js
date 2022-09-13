@@ -45,7 +45,8 @@ export default {
     'bootstrap-vue/nuxt',
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
-    '@nuxtjs/firebase'
+    '@nuxtjs/firebase',
+    '@nuxt/content'
   ],
 
   firebase: {
@@ -74,6 +75,10 @@ export default {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
     baseURL: '/'
   },
+
+  serverMiddleware: [
+    '@/server-middleware/redirects.js'
+  ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
