@@ -1,18 +1,25 @@
 <template>
-  <div>
+  <b-container fluid class="layout-container">
     <Navbar />
-    <b-container>
-      <Nuxt />
-    </b-container>
-  </div>
+    <b-row no-gutters>
+      <b-col cols="2">
+        <Sidebar />
+      </b-col>
+      <b-col>
+        <Nuxt />
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
-import Navbar from '@/components/Navbar.vue'
 export default {
-  name: 'DefaultLayout',
-  components: {
-    Navbar
-  }
+  name: 'DefaultLayout'
 }
 </script>
+
+<style scoped>
+.layout-container {
+  padding: 0;
+}
+</style>
