@@ -1,6 +1,6 @@
 <template>
   <div class="chart">
-    <canvas id="chart-component" ref="chart-component" :title="label" />
+    <canvas id="chart-component" ref="chart-component" />
   </div>
 </template>
 
