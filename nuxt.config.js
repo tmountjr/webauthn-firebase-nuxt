@@ -18,7 +18,6 @@ export default {
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
-    '@/assets/css/main.css'
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
@@ -31,8 +30,7 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/eslint
-    '@nuxtjs/eslint-module',
-    '@nuxt/postcss8'
+    '@nuxtjs/eslint-module'
   ],
 
   bootstrapVue: {
@@ -89,12 +87,6 @@ export default {
     extend (config, { isClient }) {
       if (process.env.NODE_ENV !== 'development') {
         config.devtool = isClient ? 'source-map' : 'inline-source-map'
-      }
-    },
-    postcss: {
-      plugins: {
-        tailwindcss: {},
-        autoprefixer: {}
       }
     }
   }

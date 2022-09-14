@@ -1,24 +1,26 @@
 <template>
-  <div class="sidebar pt-4 d-flex flex-column">
-    <b-nav class="d-flex flex-column">
-      <b-nav-item to="/">
-        <b-icon icon="house-door" />Dashboard
-      </b-nav-item>
-      <b-nav-item><b-icon icon="clipboard-data" />Reports</b-nav-item>
-      <b-nav-item><b-icon icon="stack" />Integrations</b-nav-item>
-    </b-nav>
-    <p class="heading muted mt-4 mb-1 pl-3">
-      User Settings
-    </p>
-    <b-nav class="d-flex flex-column">
-      <b-nav-item to="/profile">
-        <b-icon icon="person" />Public Profile
-      </b-nav-item>
-      <b-nav-item to="/settings">
-        <b-icon icon="shield-lock" />Private Settings
-      </b-nav-item>
-    </b-nav>
-  </div>
+  <b-sidebar id="sidebar" right shadow>
+    <div class="pt-4">
+      <b-nav vertical>
+        <b-nav-item to="/">
+          <b-icon icon="house-door" />Dashboard
+        </b-nav-item>
+        <b-nav-item><b-icon icon="clipboard-data" />Reports</b-nav-item>
+        <b-nav-item><b-icon icon="stack" />Integrations</b-nav-item>
+      </b-nav>
+      <p class="heading muted mt-4 mb-1 pl-3">
+        User Settings
+      </p>
+      <b-nav vertical>
+        <b-nav-item to="/profile">
+          <b-icon icon="person" />Public Profile
+        </b-nav-item>
+        <b-nav-item to="/settings">
+          <b-icon icon="shield-lock" />Private Settings
+        </b-nav-item>
+      </b-nav>
+    </div>
+  </b-sidebar>
 </template>
 
 <script>
@@ -27,11 +29,7 @@ export default {
 }
 </script>
 
-<style scoped>
-.sidebar {
-  background-color: rgb(244, 244, 244);
-  height: 100vh;
-}
+<style lang="scss" scoped>
 p.heading {
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -40,7 +38,11 @@ p.heading {
   margin-right: 0.5rem;
 }
 
-.nuxt-link-active {
-  color: rgb(0, 123, 255);
+li.nav-item a {
+  color: rgb(33, 37, 41);
+
+  &.nuxt-link-active {
+    color: rgb(0, 123, 255);
+  }
 }
 </style>

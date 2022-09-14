@@ -1,13 +1,9 @@
 <template>
   <b-container fluid class="layout-container">
     <Navbar />
-    <b-row no-gutters>
-      <b-col cols="2">
-        <Sidebar />
-      </b-col>
-      <b-col>
-        <Nuxt />
-      </b-col>
+    <b-row>
+      <Sidebar />
+      <Nuxt />
     </b-row>
   </b-container>
 </template>

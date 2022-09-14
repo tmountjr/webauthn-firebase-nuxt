@@ -7,6 +7,11 @@
       <b-nav-item to="/logout" right>
         Sign Out
       </b-nav-item>
+      <b-nav-form>
+        <b-button v-b-toggle.sidebar>
+          <b-icon icon="list" />
+        </b-button>
+      </b-nav-form>
     </b-navbar-nav>
   </b-navbar>
 </template>

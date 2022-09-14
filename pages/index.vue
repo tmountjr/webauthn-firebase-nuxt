@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="flex-grow-1">
     <client-only>
       <LineChart :labels="labels" :datasets="datasets" title="Kyle Schwarber Extra Base Hits (Career)" />
     </client-only>

@@ -57,7 +57,7 @@ $canvasY: 300px;
 $canvasX: 1000px;
 .chart {
   position: relative;
-  margin: 0 1rem;
+  margin: 0 auto;
   height: $canvasY;
   width: $canvasX;
 
