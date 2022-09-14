@@ -1,126 +1,114 @@
 <template>
-  <b-container class="login">
-    <b-form>
-      <div>
-        <b-form-group id="email-group" label="Enter your email:" label-for="email">
-          <b-form-input id="email" v-model="email" type="text" placeholder="Email Address" required />
-        </b-form-group>
-        <b-form-group v-if="currentStage === 'email'" id="email-continue-group">
-          <b-button @click.prevent="checkEmail">
-            Continue
-          </b-button>
-        </b-form-group>
-      </div>
-
-      <div v-if="currentStage === 'password'">
-        <b-form-group id="password-group" label="Enter your password:" label-for="password">
-          <b-form-input id="password" v-model="password" type="password" placeholder="Password" required />
-        </b-form-group>
-        <b-button @click.prevent="userLogin">
-          {{ submitButton }}
-        </b-button>
-      </div>
-    </b-form>
-    <Credentials v-if="isLoggedIn && uvpaAvailable" />
-  </b-container>
+  <b-card title="Please sign in">
+    <MiniAlert v-if="errorState" :error-level="errorLevel" @mini-alert-dismissed="alertDismissed">
+      {{ errorText }}
+    </MiniAlert>
+    <b-form-group>
+      <b-form-input id="email" v-model="email" placeholder="Enter email address" type="email" @blur="checkEmail" />
+      <b-form-input id="pasword" v-model="password" placeholder="Enter password" type="password" />
+    </b-form-group>
+    <b-form-group>
+      <b-button @click="userLogin">
+        {{ submitButton }}
+      </b-button>
+    </b-form-group>
+  </b-card>
 </template>
 
 <script>
-// <!-- eslint-disable no-console -->
-import { mapState, mapGetters } from 'vuex'
-import Credentials from '~/components/Credentials.vue'
-
-const base64Encode = str => Buffer.from(str).toString('base64')
+import { mapState } from 'vuex'
+import base64url from 'base64url'
+import MiniAlert from '@/components/MiniAlert.vue'
 
 export default {
-  name: 'LoginPage',
+  name: 'NewLoginPage',
   components: {
-    Credentials
+    MiniAlert
   },
-  data () {
-    return {
-      email: '',
-      password: '',
-      currentStage: 'email',
-      firebaseUID: '',
-      emailExists: false,
-      uvpaAvailable: false
-    }
-  },
+  layout: 'login',
+  data: () => ({
+    email: '',
+    password: '',
+    emailExists: false,
+    uvpaAvailable: false,
+    errorState: false,
+    errorText: '',
+    errorLevel: 'danger'
+  }),
   computed: {
     ...mapState({
-      authUser: state => state.authUser,
-      idToken: state => state.idToken
-    }),
-    ...mapGetters({
-      isLoggedIn: 'isLoggedIn',
-      idToken: 'idToken'
+      authUser: state => state.authUser
     }),
     submitButton () {
-      return this.emailExists
-        ? 'Log In'
-        : 'Create Account'
+      return this.emailExists ? 'Sign In' : 'Create Account'
+    },
+    emailMapKey () {
+      return base64url.encode(this.email).replace(/=+$/g, '')
     }
   },
   beforeMount () {
-    const currentUser = this.$fire.auth._delegate.currentUser
-    if (currentUser) {
-      this.email = currentUser.email
-      this.currentStage = 'password'
-      this.firebaseUID = currentUser.uid
+    if (this.authUser) {
+      this.email = this.authUser.email
       this.emailExists = true
     }
   },
   methods: {
-    async userLogin () {
-      let user
-      if (this.emailExists) {
-        try {
-          user = await this.$fire.auth.signInWithEmailAndPassword(this.email, this.password)
-          await this.refreshUvpa()
-        } catch (e) {
-          console.error('error while signing in', e)
-        }
-      } else {
-        try {
-          user = await this.$fire.auth.createUserWithEmailAndPassword(this.email, this.password)
-          const firebaseUid = user.user.uid
-
-          // Once this is done, create metadata on firebase
-          const mapKey = base64Encode(this.email).replace(/=+$/g, '')
-
-          const dbMapRef = this.$fire.database.ref(`map/${mapKey}`)
-          await dbMapRef.set(firebaseUid)
-
-          const dbMetaRef = this.$fire.database.ref(`users/${firebaseUid}`)
-          await dbMetaRef.set({ email: this.email })
-          await this.refreshUvpa()
-        } catch (e) {
-          console.error('error while creating new account', e)
-        }
-      }
-    },
-    async checkEmail () {
-      const mapKey = base64Encode(this.email).replace(/=+$/g, '')
-      const ref = this.$fire.database.ref(`map/${mapKey}`)
-      try {
-        const snapshot = await ref.once('value')
-        this.firebaseUID = snapshot.val()
-        if (this.firebaseUID) {
-          this.emailExists = true
-        }
-        this.currentStage = 'password'
-        await this.refreshUvpa()
-      } catch (e) {
-        console.error(e)
-      }
-    },
     async refreshUvpa () {
       if (window?.PublicKeyCredential) {
         const uvpa = await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
         this.uvpaAvailable = uvpa
       }
+    },
+    async userLogin () {
+      let user
+      if (this.emailExists) {
+        try {
+          user = await this.$fire.auth.signInWithEmailAndPassword(this.email, this.password)
+        } catch (e) {
+          this.errorState = true
+          this.errorText = 'Unable to log in with username and password.'
+        }
+      } else {
+        try {
+          user = await this.$fire.auth.createUserWithEmailAndPassword(this.email, this.password)
+          const firebaseUid = user.user.uid
+          const dbMapRef = this.$fire.database.ref(`map/${this.emailMapKey}`)
+          await dbMapRef.set(firebaseUid)
+
+          const dbMetaRef = this.$fire.database.ref(`users/${firebaseUid}`)
+          await dbMetaRef.set({ email: this.email })
+        } catch (e) {
+          this.errorState = true
+          this.errorText = 'Unable to create account.'
+        }
+      }
+      await this.refreshUvpa()
+    },
+    async checkEmail () {
+      const ref = this.$fire.database.ref(`map/${this.emailMapKey}`)
+      try {
+        const snapshot = await ref.once('value')
+        const fbUid = snapshot.val()
+        if (fbUid) {
+          this.emailExists = true
+        }
+      } catch (e) {
+        this.errorLevel = 'warning'
+        this.errorState = true
+        this.errorText = 'Unable to verify email status.'
+      }
+    },
+    alertDismissed () {
+      this.errorState = false
+      this.errorText = ''
+      this.errorLevel = 'danger'
     }
   }
 }
 </script>
+
+<style scoped>
+button {
+  width: 100%;
+}
+</style>
