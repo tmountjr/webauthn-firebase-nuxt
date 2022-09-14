@@ -1,6 +1,6 @@
 <template>
   <div class="chart">
-    <canvas id="chart-component" ref="chart-component" :width="width" :height="height" :label="label" />
+    <canvas id="chart-component" ref="chart-component" :title="label" />
   </div>
 </template>
 
@@ -10,14 +10,6 @@ import Chart from 'chart.js/auto'
 export default {
   name: 'LineChartComponent',
   props: {
-    width: {
-      type: Number,
-      default: 400
-    },
-    height: {
-      type: Number,
-      default: 400
-    },
     labels: {
       type: Array,
       default: () => ([])
@@ -26,7 +18,7 @@ export default {
       type: Array,
       default: () => ([])
     },
-    label: {
+    title: {
       type: String,
       default: ''
     }
@@ -37,19 +29,19 @@ export default {
   mounted () {
     const ctx = document.getElementById('chart-component').getContext('2d')
     const options = {
-      responsive: true
+      responsive: true,
+      maintainAspectRatio: false
     }
-    if (this.label) {
+    if (this.title) {
       options.plugins = {
         title: {
           display: true,
-          text: this.label
+          text: this.title
         }
       }
     }
     this.chartRef = new Chart(ctx, {
       type: 'line',
-      label: this.label,
       data: {
         labels: this.labels,
         datasets: this.datasets
@@ -60,11 +52,18 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+$canvasY: 300px;
+$canvasX: 1000px;
 .chart {
   position: relative;
-  margin: auto;
-  height: 20vh;
-  width: 40vw;
+  margin: 0 1rem;
+  height: $canvasY;
+  width: $canvasX;
+
+  @media (max-width: 768px) {
+    height: calc($canvasY / 2);
+    width: calc($canvasX / 4);
+  }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <client-only>
-      <LineChart :labels="labels" :datasets="datasets" label="Kyle Schwarber Extra Base Hits (Career)" :width="100" :height="100" />
+      <LineChart :labels="labels" :datasets="datasets" title="Kyle Schwarber Extra Base Hits (Career)" />
     </client-only>
   </div>
 </template>
