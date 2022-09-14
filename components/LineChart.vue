@@ -27,7 +27,7 @@ export default {
     chartRef: {}
   }),
   mounted () {
-    const ctx = document.getElementById('chart-component').getContext('2d')
+    const ctx = this.$refs['chart-component'].getContext('2d')
     const options = {
       responsive: true,
       maintainAspectRatio: false
