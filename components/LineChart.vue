@@ -1,6 +1,6 @@
 <template>
   <div class="chart">
-    <canvas id="chart-component" ref="chart-component" :width="width" :height="height" />
+    <canvas id="chart-component" ref="chart-component" :width="width" :height="height" :label="label" />
   </div>
 </template>
 
@@ -22,9 +22,13 @@ export default {
       type: Array,
       default: () => ([])
     },
-    data: {
+    datasets: {
       type: Array,
       default: () => ([])
+    },
+    label: {
+      type: String,
+      default: ''
     }
   },
   data: () => ({
@@ -32,18 +36,25 @@ export default {
   }),
   mounted () {
     const ctx = document.getElementById('chart-component').getContext('2d')
-    // eslint-disable-next-line no-unused-vars
+    const options = {
+      responsive: true
+    }
+    if (this.label) {
+      options.plugins = {
+        title: {
+          display: true,
+          text: this.label
+        }
+      }
+    }
     this.chartRef = new Chart(ctx, {
       type: 'line',
+      label: this.label,
       data: {
         labels: this.labels,
-        datasets: [{
-          data: this.data
-        }]
+        datasets: this.datasets
       },
-      options: {
-        responsive: true
-      }
+      options
     })
   }
 }
