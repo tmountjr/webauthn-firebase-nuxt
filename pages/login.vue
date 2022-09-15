@@ -18,13 +18,10 @@
 <script>
 import { mapState } from 'vuex'
 import base64url from 'base64url'
-import MiniAlert from '@/components/MiniAlert.vue'
+// import { getAuth, getIdToken } from 'firebase/auth'
 
 export default {
   name: 'NewLoginPage',
-  components: {
-    MiniAlert
-  },
   layout: 'login',
   data: () => ({
     email: '',
@@ -68,6 +65,10 @@ export default {
           this.errorState = true
           this.errorText = 'Unable to log in with username and password.'
         }
+
+        // const auth = getAuth(this.$fire.auth.app)
+        // eslint-disable-next-line no-unused-vars
+        // const idToken = await getIdToken(auth.currentUser)
       } else {
         try {
           user = await this.$fire.auth.createUserWithEmailAndPassword(this.email, this.password)

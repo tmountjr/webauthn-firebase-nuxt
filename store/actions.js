@@ -47,10 +47,6 @@ export default {
    * Create a new credential in Firebase.
    */
   async createCredential ({ commit, dispatch, state }, credential) {
-    // TODO: "credential" ends up being an instance of Vue, and not what was
-    // passed from the component.
-    debugger
-    // Update the store.
     await dispatch('refreshCredential')
 
     const fbUid = state.authUser.uid
