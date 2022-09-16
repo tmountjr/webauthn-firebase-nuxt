@@ -31,11 +31,14 @@ export default async function (req, res, next) {
 
   // Check the cookies. We can't really use express's middleware.
   const cookies = new Cookies(req.headers.cookie)
-  console.log(cookies)
   const idToken = cookies.get('fbId')
   if (!idToken) {
     // Cookie not found, so send to login page.
-    res.writeHead(301, { location: '/login' })
+    let location = '/login'
+    if (reqUrl !== '/login') {
+      location = `/login?redirectTo=${encodeURIComponent(reqUrl)}`
+    }
+    res.writeHead(301, { location })
     return res.end()
   }
 

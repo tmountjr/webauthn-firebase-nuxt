@@ -1,4 +1,7 @@
-export default {
+import fs from 'fs'
+import path from 'path'
+
+const config = {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'webauthn-firebase-nuxt',
@@ -93,3 +96,14 @@ export default {
     }
   }
 }
+
+if (process.env.NODE_ENV === 'development' && ('LOCALHOST_HTTPS_CERT' in process.env && 'LOCALHOST_HTTPS_KEY' in process.env)) {
+  config.server = {
+    https: {
+      key: fs.readFileSync(path.resolve(__dirname, process.env.LOCALHOST_HTTPS_KEY)),
+      cert: fs.readFileSync(path.resolve(__dirname, process.env.LOCALHOST_HTTPS_CERT))
+    }
+  }
+}
+
+export default config

@@ -67,13 +67,11 @@ export default {
         }
 
         const auth = getAuth(this.$fire.auth.app)
-        // eslint-disable-next-line no-unused-vars
         const idToken = await getIdToken(auth.currentUser)
         this.$cookies.set('fbId', idToken, {
           maxAge: 60 * 60 * 12,
-          sameSite: 'lax'
-          // httpOnly: true,
-          // secure: true
+          sameSite: 'lax',
+          secure: true
         })
       } else {
         try {
@@ -90,6 +88,13 @@ export default {
         }
       }
       await this.refreshUvpa()
+
+      // Redirect the user to '/' unless the redirectTo query parameter is set.
+      const dest = 'redirectTo' in this.$route.query
+        ? this.$route.query.redirectTo
+        : '/'
+
+      this.$router.push(dest)
     },
     async checkEmail () {
       const ref = this.$fire.database.ref(`map/${this.emailMapKey}`)

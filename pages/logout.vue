@@ -9,6 +9,7 @@ export default {
   name: 'LogoutPage',
   async mounted () {
     await this.$fire.auth.signOut()
+    this.$cookies.remove('fbId')
     this.$router.push('/login')
   }
 }
