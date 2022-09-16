@@ -18,7 +18,7 @@
 <script>
 import { mapState } from 'vuex'
 import base64url from 'base64url'
-// import { getAuth, getIdToken } from 'firebase/auth'
+import { getAuth, getIdToken } from 'firebase/auth'
 
 export default {
   name: 'NewLoginPage',
@@ -66,9 +66,15 @@ export default {
           this.errorText = 'Unable to log in with username and password.'
         }
 
-        // const auth = getAuth(this.$fire.auth.app)
+        const auth = getAuth(this.$fire.auth.app)
         // eslint-disable-next-line no-unused-vars
-        // const idToken = await getIdToken(auth.currentUser)
+        const idToken = await getIdToken(auth.currentUser)
+        this.$cookies.set('fbId', idToken, {
+          maxAge: 60 * 60 * 12,
+          sameSite: 'lax'
+          // httpOnly: true,
+          // secure: true
+        })
       } else {
         try {
           user = await this.$fire.auth.createUserWithEmailAndPassword(this.email, this.password)

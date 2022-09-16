@@ -44,7 +44,8 @@ export default {
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
     '@nuxtjs/firebase',
-    '@nuxt/content'
+    '@nuxt/content',
+    'cookie-universal-nuxt'
   ],
 
   firebase: {
@@ -75,7 +76,8 @@ export default {
   },
 
   serverMiddleware: [
-    '@/server-middleware/redirects.js'
+    '@/server-middleware/redirects.js',
+    '@/server-middleware/verifyFirebase.js'
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
