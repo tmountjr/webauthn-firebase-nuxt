@@ -41,7 +41,7 @@ p.heading {
 li.nav-item a {
   color: rgb(33, 37, 41);
 
-  &.nuxt-link-active {
+  &.nuxt-link-exact-active {
     color: rgb(0, 123, 255);
   }
 }
