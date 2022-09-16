@@ -24,9 +24,17 @@
           <b-button @click.prevent="setLocalCredId(data.item.credId)">
             Use
           </b-button>
+          <b-button @click.prevent="testCredential(data.item.credId)">
+            Test
+          </b-button>
           <b-button variant="danger" @click.prevent="deleteCredential(data.item.credId)">
             Delete
           </b-button>
+        </template>
+        <template v-if="showCaption" #table-caption>
+          <MiniAlert :error-level="tableCaptionDetails.errorLevel" @mini-alert-dismissed="resetMiniAlert">
+            {{ tableCaptionDetails.content }}
+          </MiniAlert>
         </template>
       </b-table>
     </div>
@@ -35,6 +43,8 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import { signinRequest, signinResponse } from '@/lib/auth'
+
 export default {
   name: 'CredentialPickerComponent',
   data: () => ({
@@ -42,7 +52,12 @@ export default {
       { key: 'credId', label: 'CredID' },
       { key: 'credentialName', label: 'Credential Name' },
       { key: 'actions', label: 'Actions' }
-    ]
+    ],
+    showCaption: false,
+    tableCaptionDetails: {
+      errorLevel: 'danger',
+      content: ''
+    }
   }),
   computed: {
     ...mapState({
@@ -50,12 +65,20 @@ export default {
     })
   },
   methods: {
-    setLocalCredId (credId) {
-      window.localStorage.setItem('credId', credId)
-    },
     ...mapActions({
       deleteFirebaseCredential: 'deleteCredential'
     }),
+    resetMiniAlert () {
+      this.showCaption = false
+      this.tableCaptionDetails.errorLevel = 'danger'
+      this.tableCaptionDetails.content = ''
+    },
+    setLocalCredId (credId) {
+      window.localStorage.setItem('credId', credId)
+      this.tableCaptionDetails.errorLevel = 'success'
+      this.tableCaptionDetails.content = 'Successfully linked local credential. Please test it if you haven\'t yet.'
+      this.showCaption = true
+    },
     async deleteCredential (credId) {
       await this.deleteFirebaseCredential(credId)
 
@@ -63,6 +86,35 @@ export default {
       const localCredId = window.localStorage.getItem('credId')
       if (credId === localCredId) {
         window.localStorage.removeItem('credId')
+      }
+    },
+    async testCredential (credId) {
+      const options = signinRequest({
+        user: { ...this.authUser, credentials: this.credentials },
+        credId
+      })
+
+      const cred = await window.navigator.credentials.get({
+        publicKey: options
+      })
+
+      try {
+        const success = await signinResponse({
+          user: { ...this.authUser, credentials: this.credentials },
+          rawCredential: cred
+        })
+        if (success) {
+          this.tableCaptionDetails.errorLevel = 'success'
+          this.tableCaptionDetails.content = 'Successfully validated credential.'
+        } else {
+          this.tableCaptionDetails.errorLevel = 'danger'
+          this.tableCaptionDetails.content = 'Unable to validate credential.'
+        }
+      } catch (e) {
+        this.tableCaptionDetails.errorLevel = 'danger'
+        this.tableCaptionDetails.content = `Error occurred: ${e}`
+      } finally {
+        this.showCaption = true
       }
     }
   }
