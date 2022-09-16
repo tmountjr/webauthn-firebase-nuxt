@@ -90,3 +90,9 @@ sw.*
 *.swp
 
 .envrc
+
+# Google creds
+authCreds.json
+
+# localhost https
+*.pem
