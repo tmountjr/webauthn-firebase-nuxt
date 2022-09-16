@@ -1,32 +1,18 @@
 <template>
-  <div class="credentials">
-    <hr>
-    <h1>Credentials</h1>
-    <b-button @click="showCredentialName">
-      Add Credential
-    </b-button>
-    <b-input-group v-if="showNewCredential">
-      <b-form-input v-model="newCredentialName" />
-      <b-input-group-append>
-        <b-button @click="startRegisterCredential">
-          Register Credential
-        </b-button>
-      </b-input-group-append>
-    </b-input-group>
-    <div v-if="!hasCredentials">
-      <p>No credentials stored.</p>
+  <div class="addCredential">
+    <div class="row">
+      <h1>Register New Credential</h1>
     </div>
-    <div v-else>
-      <p>Here are your credentials:</p>
-      <ul>
-        <li v-for="cred in credentials" :key="cred.credId">
-          Credential ID: {{ cred.credId.slice(0, 8) }}... <br>
-          Credential Name: {{ cred.credentialName }} <br>
-          <b-button variant="danger" @click="deleteCredential(cred.credId)">
-            <b-icon icon="trash" />
+
+    <div class="row">
+      <b-input-group>
+        <b-form-input v-model="newCredentialName" />
+        <b-input-group-append>
+          <b-button @click="startRegisterCredential">
+            Register Credential
           </b-button>
-        </li>
-      </ul>
+        </b-input-group-append>
+      </b-input-group>
     </div>
   </div>
 </template>
@@ -36,7 +22,7 @@ import { mapState, mapActions } from 'vuex'
 import { registerCredential, registerResponse } from '@/lib/auth'
 
 export default {
-  name: 'CredentialsComponent',
+  name: 'AddCredentialComponent',
   props: {
     currentUser: {
       type: Object,
@@ -46,8 +32,7 @@ export default {
     }
   },
   data: () => ({
-    newCredentialName: '',
-    showNewCredential: false
+    newCredentialName: ''
   }),
   computed: {
     ...mapState({
@@ -60,13 +45,8 @@ export default {
   },
   methods: {
     ...mapActions({
-      createCredential: 'createCredential',
-      deleteFirebaseCredential: 'deleteCredential'
+      createCredential: 'createCredential'
     }),
-    showCredentialName () {
-      this.newCredentialName = ''
-      this.showNewCredential = true
-    },
     async startRegisterCredential () {
       // Get information that the device needs to create credentials.
       const options = registerCredential({
@@ -93,16 +73,6 @@ export default {
         console.error(e)
       } finally {
         this.newCredentialName = ''
-        this.showNewCredential = false
-      }
-    },
-    async deleteCredential (credId) {
-      await this.deleteFirebaseCredential(credId)
-
-      // Check local storage too, just to make sure
-      const localCredId = window.localStorage.getItem('credId')
-      if (credId === localCredId) {
-        window.localStorage.removeItem('credId')
       }
     }
   }

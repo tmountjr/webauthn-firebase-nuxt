@@ -3,7 +3,9 @@
     <Navbar />
     <b-row>
       <Sidebar />
-      <Nuxt />
+      <b-container>
+        <Nuxt />
+      </b-container>
     </b-row>
   </b-container>
 </template>

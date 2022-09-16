@@ -5,7 +5,9 @@ import Cookies from 'universal-cookie'
 /** Exclude some paths from processing */
 const include = [
   '/',
-  '/reauth'
+  '/credential-manager',
+  '/profile',
+  '/settings'
 ]
 
 const ADMIN_APP_NAME = 'firebase-admin-app'
@@ -38,7 +40,7 @@ export default async function (req, res, next) {
     if (reqUrl !== '/login') {
       location = `/login?redirectTo=${encodeURIComponent(reqUrl)}`
     }
-    res.writeHead(301, { location })
+    res.writeHead(307, { location })
     return res.end()
   }
 

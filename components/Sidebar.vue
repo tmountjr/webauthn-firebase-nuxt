@@ -15,8 +15,8 @@
         <b-nav-item to="/profile">
           <b-icon icon="person" />Public Profile
         </b-nav-item>
-        <b-nav-item to="/settings">
-          <b-icon icon="shield-lock" />Private Settings
+        <b-nav-item to="/credential-manager">
+          <b-icon icon="shield-lock" />Credential Manager
         </b-nav-item>
       </b-nav>
     </div>
