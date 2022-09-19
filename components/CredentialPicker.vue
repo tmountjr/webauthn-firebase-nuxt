@@ -1,43 +1,49 @@
 <template>
   <div class="credentialPicker">
-    <div class="row">
-      <h1>Available Credentials</h1>
-    </div>
+    <b-row>
+      <b-col>
+        <h1>Available Credentials</h1>
+      </b-col>
+    </b-row>
 
-    <div class="row">
-      <p class="mb-0">
-        Notes:
-        <ul>
-          <li>These are the credentials that are registered to your account.</li>
-          <li>Not all of these credentials may be available on this device.</li>
-          <li>Clicking "Use" will allow you to use the specified credential when performing actions that require additional authorization.</li>
-        </ul>
-      </p>
-    </div>
+    <b-row>
+      <b-col>
+        <p class="mb-0">
+          Notes:
+          <ul>
+            <li>These are the credentials that are registered to your account.</li>
+            <li>Not all of these credentials may be available on this device.</li>
+            <li>Clicking "Use" will allow you to use the specified credential when performing actions that require additional authorization.</li>
+          </ul>
+        </p>
+      </b-col>
+    </b-row>
 
-    <div class="row">
-      <b-table head-variant="dark" :items="credentials" :fields="fields">
-        <template #cell(credId)="data">
-          {{ data.value?.slice(0, 8) }}...
-        </template>
-        <template #cell(actions)="data">
-          <b-button @click.prevent="setLocalCredId(data.item.credId)">
-            Use
-          </b-button>
-          <b-button @click.prevent="testCredential(data.item.credId)">
-            Test
-          </b-button>
-          <b-button variant="danger" @click.prevent="deleteCredential(data.item.credId)">
-            Delete
-          </b-button>
-        </template>
-        <template v-if="showCaption" #table-caption>
-          <MiniAlert :error-level="tableCaptionDetails.errorLevel" @mini-alert-dismissed="resetMiniAlert">
-            {{ tableCaptionDetails.content }}
-          </MiniAlert>
-        </template>
-      </b-table>
-    </div>
+    <b-row>
+      <b-col>
+        <b-table head-variant="dark" :items="credentials" :fields="fields">
+          <template #cell(credId)="data">
+            {{ data.value?.slice(0, 8) }}...
+          </template>
+          <template #cell(actions)="data">
+            <b-button @click.prevent="setLocalCredId(data.item.credId)">
+              Use
+            </b-button>
+            <b-button @click.prevent="testCredential(data.item.credId)">
+              Test
+            </b-button>
+            <b-button variant="danger" @click.prevent="deleteCredential(data.item.credId)">
+              Delete
+            </b-button>
+          </template>
+          <template v-if="showCaption" #table-caption>
+            <MiniAlert :error-level="tableCaptionDetails.errorLevel" @mini-alert-dismissed="resetMiniAlert">
+              {{ tableCaptionDetails.content }}
+            </MiniAlert>
+          </template>
+        </b-table>
+      </b-col>
+    </b-row>
   </div>
 </template>
 

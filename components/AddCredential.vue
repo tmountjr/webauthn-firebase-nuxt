@@ -1,19 +1,31 @@
 <template>
   <div class="addCredential">
-    <div class="row">
-      <h1>Register New Credential</h1>
-    </div>
+    <b-row>
+      <b-col>
+        <h1>Register New Credential</h1>
+      </b-col>
+    </b-row>
 
-    <div class="row">
-      <b-input-group>
-        <b-form-input v-model="newCredentialName" />
-        <b-input-group-append>
-          <b-button @click="startRegisterCredential">
-            Register Credential
-          </b-button>
-        </b-input-group-append>
-      </b-input-group>
-    </div>
+    <b-row>
+      <b-col>
+        <b-input-group>
+          <b-form-input v-model="newCredentialName" />
+          <b-input-group-append>
+            <b-button @click="startRegisterCredential">
+              Register Credential
+            </b-button>
+          </b-input-group-append>
+        </b-input-group>
+      </b-col>
+    </b-row>
+
+    <b-row v-if="showCaption" class="mt-1">
+      <b-col>
+        <MiniAlert :error-level="captionDetails.errorLevel" @mini-alert-dismissed="resetMiniAlert">
+          {{ captionDetails.content }}
+        </MiniAlert>
+      </b-col>
+    </b-row>
   </div>
 </template>
 
@@ -32,7 +44,12 @@ export default {
     }
   },
   data: () => ({
-    newCredentialName: ''
+    newCredentialName: '',
+    showCaption: false,
+    captionDetails: {
+      errorLevel: 'danger',
+      content: ''
+    }
   }),
   computed: {
     ...mapState({
@@ -54,12 +71,8 @@ export default {
         credentials: this.credentials
       })
 
-      const cred = await window.navigator.credentials.create({ publicKey: options })
-
-      // Save the credential locally.
-      window.localStorage.setItem('credId', cred.id)
-
       try {
+        const cred = await window.navigator.credentials.create({ publicKey: options })
         const newCredential = await registerResponse({
           user: { ...this.authUser, credentials: this.credentials },
           rawCredential: cred,
@@ -68,12 +81,21 @@ export default {
         // userResp.credentials contains what should be the new list of credentials.
         if (newCredential) {
           await this.createCredential(newCredential)
+
+          // Save the credential locally.
+          window.localStorage.setItem('credId', cred.id)
         }
       } catch (e) {
-        console.error(e)
+        this.captionDetails.content = `Unable to register new credential: "${e.message}"`
+        this.showCaption = true
       } finally {
         this.newCredentialName = ''
       }
+    },
+    resetMiniAlert () {
+      this.showCaption = false
+      this.captionDetails.errorLevel = 'danger'
+      this.captionDetails.content = ''
     }
   }
 }
