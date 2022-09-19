@@ -96,3 +96,5 @@ authCreds.json
 
 # localhost https
 *.pem
+# Layer0 generated build directory
+.layer0
