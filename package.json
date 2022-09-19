@@ -1,9 +1,9 @@
 {
   "scripts": {
-    "layer0:dev": "node layer0/setNodeModules.js && layer0 dev",
-    "layer0:build": "node layer0/setNodeModules.js && layer0 build",
-    "layer0:deploy": "node layer0/setNodeModules.js && layer0 deploy",
-    "layer0:prod": "node layer0/setNodeModules.js && layer0 run -p",
+    "layer0:dev": "layer0 dev",
+    "layer0:build": "layer0 build",
+    "layer0:deploy": "layer0 deploy",
+    "layer0:prod": "layer0 run -p",
     "http-dev": "nuxt",
     "dev": "export NODE_TLS_REJECT_UNAUTHORIZED=0 && nuxt --env.NODE_TLS_REJECT_UNAUTHORIZED=0",
     "build": "nuxt build",
