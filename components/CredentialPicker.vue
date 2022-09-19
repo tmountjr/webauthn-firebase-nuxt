@@ -25,6 +25,9 @@
           <template #cell(credId)="data">
             {{ data.value?.slice(0, 8) }}...
           </template>
+          <template #cell(inUse)="data">
+            {{ data.item.credId === defaultCredId ? '✓' : '' }}
+          </template>
           <template #cell(actions)="data">
             <b-button @click.prevent="setLocalCredId(data.item.credId)">
               Use
@@ -57,18 +60,27 @@ export default {
     fields: [
       { key: 'credId', label: 'CredID' },
       { key: 'credentialName', label: 'Credential Name' },
+      { key: 'inUse', label: 'In use' },
       { key: 'actions', label: 'Actions' }
     ],
     showCaption: false,
     tableCaptionDetails: {
       errorLevel: 'danger',
       content: ''
-    }
+    },
+    defaultCredId: ''
   }),
   computed: {
     ...mapState({
       credentials: state => state.credentials
-    })
+    }),
+    credInUse (credId) {
+      const defaultCred = window.localStorage.getItem('credId')
+      return defaultCred === credId
+    }
+  },
+  beforeMount () {
+    this.defaultCredId = window.localStorage.getItem('credId')
   },
   methods: {
     ...mapActions({
