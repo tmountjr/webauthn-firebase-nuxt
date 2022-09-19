@@ -39,6 +39,11 @@ export default {
       favoriteColor: ''
     }
   }),
+  computed: {
+    ...mapState({
+      authUser: state => state.authUser
+    })
+  },
   async beforeMount () {
     const ref = this.$fire.database.ref(`users/${this.authUser.uid}/profile`)
     const snapshot = await ref.once('value')
@@ -47,11 +52,6 @@ export default {
       this.profile.name = profileData.name
       this.profile.favoriteColor = profileData.favoriteColor
     }
-  },
-  computed: {
-    ...mapState({
-      authUser: state => state.authUser
-    })
   },
   methods: {
     async updateUser () {
