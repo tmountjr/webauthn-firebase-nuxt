@@ -1,6 +1,6 @@
 import Url from 'url-parse'
+import admin from 'firebase-admin'
 import Cookies from 'universal-cookie'
-import { app, initializeApp, credential as _credential } from 'firebase-admin'
 
 /** Exclude some paths from processing */
 const include = [
@@ -21,11 +21,13 @@ export default async function (req, res, next) {
 
   let adminApp
   try {
-    adminApp = app(ADMIN_APP_NAME)
+    adminApp = admin.app(ADMIN_APP_NAME)
   } catch (e) {
-    const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS)
-    adminApp = initializeApp({
-      credential: _credential.cert(serviceAccount)
+    const creds = JSON.parse(process.env.GAPP_CREDENTIALS)
+    creds.private_key = creds.private_key.replace(/\\n/gm, '\n')
+    adminApp = admin.initializeApp({
+      credential: admin.credential.cert(creds),
+      databaseURL: process.env.FIREBASE_DATABASE_URL
     }, ADMIN_APP_NAME)
   }
 

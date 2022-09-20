@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import nodeExternals from 'webpack-node-externals'
 
 const config = {
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -93,9 +94,16 @@ const config = {
       compact: process.env.NODE_ENV !== 'development',
       sourceRoot: __dirname
     },
-    extend (config, { isClient }) {
+    extend (config, { isClient, isServer }) {
       if (process.env.NODE_ENV !== 'development') {
         config.devtool = isClient ? 'source-map' : 'inline-source-map'
+      }
+
+      if (isServer) {
+        config.target = 'node'
+        config.externals = [nodeExternals({
+          allowlist: [/^(?!firebase-admin).+/]
+        })]
       }
     }
   }
