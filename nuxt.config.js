@@ -1,6 +1,5 @@
 import fs from 'fs'
 import path from 'path'
-import nodeExternals from 'webpack-node-externals'
 
 const config = {
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -41,10 +40,6 @@ const config = {
 
     // https://go.nuxtjs.dev/bootstrap
     'bootstrap-vue/nuxt',
-    // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios',
-    '@nuxtjs/firebase',
-    '@nuxt/content',
     'cookie-universal-nuxt'
   ],
 
@@ -54,6 +49,10 @@ const config = {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    '@nuxt/content',
+    // https://go.nuxtjs.dev/axios
+    '@nuxtjs/axios',
+    '@nuxtjs/firebase'
   ],
 
   firebase: {
@@ -100,6 +99,7 @@ const config = {
       }
 
       if (isServer) {
+        const nodeExternals = require('webpack-node-externals')
         config.target = 'node'
         config.externals = [nodeExternals({
           allowlist: [/^(?!firebase-admin).+/]
