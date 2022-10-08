@@ -1,5 +1,6 @@
 import fs from 'fs'
 import path from 'path'
+import webpack from 'webpack'
 
 const config = {
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -93,9 +94,16 @@ const config = {
       compact: process.env.NODE_ENV !== 'development',
       sourceRoot: __dirname
     },
+    transpile: [
+      '@simplewebauthn/browser'
+    ],
     extend (config, { isClient, isServer }) {
       if (process.env.NODE_ENV !== 'development') {
         config.devtool = isClient ? 'source-map' : 'inline-source-map'
+      }
+
+      if (isClient) {
+        config.output.globalObject = 'this'
       }
 
       if (isServer) {
@@ -109,13 +117,13 @@ const config = {
   }
 }
 
-if (process.env.NODE_ENV === 'development' && ('LOCALHOST_HTTPS_CERT' in process.env && 'LOCALHOST_HTTPS_KEY' in process.env)) {
-  config.server = {
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, process.env.LOCALHOST_HTTPS_KEY)),
-      cert: fs.readFileSync(path.resolve(__dirname, process.env.LOCALHOST_HTTPS_CERT))
-    }
-  }
-}
+// if ('LOCALHOST_HTTPS_CERT' in process.env && 'LOCALHOST_HTTPS_KEY' in process.env) {
+//   config.server = {
+//     https: {
+//       key: fs.readFileSync(path.resolve(__dirname, process.env.LOCALHOST_HTTPS_KEY)),
+//       cert: fs.readFileSync(path.resolve(__dirname, process.env.LOCALHOST_HTTPS_CERT))
+//     }
+//   }
+// }
 
 export default config
