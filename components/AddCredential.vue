@@ -43,7 +43,6 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import { startRegistration } from '@simplewebauthn/browser'
-// import { registerCredential, registerResponse } from '@/lib/auth'
 
 export default {
   name: 'AddCredentialComponent',
@@ -73,7 +72,6 @@ export default {
       return this.credentials.length > 0
     },
     webauthnAvailable () {
-      // return browserSupportsWebAuthn()
       return true
     }
   },
@@ -106,7 +104,9 @@ export default {
 
         attResp = await startRegistration(opts)
       } catch (e) {
-        // TODO: error handling
+        this.captionDetails.content = e.message
+        this.showCaption = true
+        return
       }
 
       const verificationResp = await this.$axios('/auth/verify-registration', {
@@ -121,42 +121,16 @@ export default {
         }
       })
 
-      console.log(attResp)
-
-      const verificationJson = verificationResp.data
-      if (verificationJson && verificationJson.verified) {
-        alert('success!')
+      const { verified, newDevice, credentialIdSerialized } = verificationResp.data
+      if (verified) {
+        window.localStorage.setItem('activeCredential', credentialIdSerialized)
+        await this.createCredential(newDevice)
+        this.captionDetails.errorLevel = 'success'
+        this.captionDetails.content = 'Successfully registered device!'
       } else {
-        alert('failure')
-        console.error(verificationJson)
+        this.captionDetails.content = 'Unable to register device.'
       }
-
-      // // Get information that the device needs to create credentials.
-      // const options = registerCredential({
-      //   user: this.authUser,
-      //   credentials: this.credentials
-      // })
-
-      // try {
-      //   const cred = await window.navigator.credentials.create({ publicKey: options })
-      //   const newCredential = await registerResponse({
-      //     user: { ...this.authUser, credentials: this.credentials },
-      //     rawCredential: cred,
-      //     credentialName: this.newCredentialName
-      //   })
-      //   // userResp.credentials contains what should be the new list of credentials.
-      //   if (newCredential) {
-      //     await this.createCredential(newCredential)
-
-      //     // Save the credential locally.
-      //     window.localStorage.setItem('credId', cred.id)
-      //   }
-      // } catch (e) {
-      //   this.captionDetails.content = `Unable to register new credential: "${e.message}"`
-      //   this.showCaption = true
-      // } finally {
-      //   this.newCredentialName = ''
-      // }
+      this.showCaption = true
     },
     resetMiniAlert () {
       this.showCaption = false

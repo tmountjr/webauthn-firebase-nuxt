@@ -1,10 +1,11 @@
 // This file was added by layer0 init.
 // You should commit this file to source control.
 
-import { generateRegistrationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server'
+import { generateRegistrationOptions, verifyRegistrationResponse } from '@simplewebauthn/server'
+import base64url from 'base64url'
+
 const { Router } = require('@layer0/core/router')
 const { nuxtRoutes } = require('@layer0/nuxt')
-const { default: base64url } = require('base64url')
 
 const NO_CACHE = {
   browser: {
@@ -27,13 +28,14 @@ const rpName = 'Webauthn / Firebase / Nuxt Demo'
 module.exports = new Router()
   // Prevent search engines from indexing permalink URLs
   .noIndexPermalink()
+
   .match('/service-worker.js', ({ serviceWorker }) => {
     serviceWorker('.nuxt/dist/client/service-worker.js')
   })
 
   .post('/auth/generate-registration-options', ({ cache, compute }) => {
     cache(NO_CACHE)
-    compute(async (req, res) => {
+    compute((req, res) => {
       const body = JSON.parse(req.body)
       const { user, devices } = body
       const opts = {
@@ -70,13 +72,12 @@ module.exports = new Router()
     })
   })
 
-  // TODO: check if this is the right method or not - it's acting like the authenticator
-  // has already been registered and verified.
   .post('/auth/verify-registration', ({ compute }) => {
     compute(async (req, res) => {
       res.setHeader('content-type', 'application/json')
 
-      const { credential, devices, expectedChallenge } = JSON.parse(req.body)
+      const body = JSON.parse(req.body)
+      const { credential, devices, expectedChallenge } = body
       devices.forEach((device) => {
         for (const prop in device) {
           if (
@@ -89,21 +90,6 @@ module.exports = new Router()
         }
       })
 
-      let dbAuthenticator
-      const bodyCredIDBuffer = base64url.toBuffer(credential.rawId)
-      for (const dev of devices) {
-        if (dev.credentialID.equals(bodyCredIDBuffer)) {
-          dbAuthenticator = dev
-          break
-        }
-      }
-
-      if (!dbAuthenticator) {
-        res.statusCode = 400
-        res.body = JSON.stringify({ error: 'Authenticator is not registered with this site. ' })
-        return res
-      }
-
       let verification
       try {
         const opts = {
@@ -111,27 +97,33 @@ module.exports = new Router()
           expectedChallenge,
           expectedOrigin,
           expectedRPID: rpID,
-          authenticator: dbAuthenticator,
           requireUserVerification: true
         }
-        verification = await verifyAuthenticationResponse(opts)
+        verification = await verifyRegistrationResponse(opts)
       } catch (error) {
-        console.log(error)
         res.statusCode = 400
         res.body = JSON.stringify({ error: error.message })
         return res
       }
 
-      const { verified, authenticationInfo } = verification
-      if (verified) {
-        dbAuthenticator.counter = authenticationInfo.newCounter
+      const { verified, registrationInfo } = verification
+      const returnValue = { verified }
+      if (verified && registrationInfo) {
+        const { credentialPublicKey, credentialID, counter } = registrationInfo
+        const existingDevice = devices.find(device => device.credentialID.equals(credentialID))
+        if (!existingDevice) {
+          const newDevice = {
+            credentialPublicKey,
+            credentialID,
+            counter,
+            transports: credential.transports
+          }
+          returnValue.newDevice = newDevice
+          returnValue.credentialIdSerialized = base64url.encode(credentialID)
+        }
       }
 
-      res.body = JSON.stringify({
-        verified,
-        counter: dbAuthenticator.counter
-      })
-      return res
+      res.body = JSON.stringify(returnValue)
     })
   })
 
@@ -147,4 +139,5 @@ module.exports = new Router()
       }
     })
   })
+
   .use(nuxtRoutes)
