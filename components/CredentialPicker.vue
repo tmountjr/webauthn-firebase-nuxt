@@ -120,7 +120,7 @@ export default {
           }
         })
       } catch (e) {
-        this.captionDetails.content = e.message
+        this.tableCaptionDetails.content = e.message
         this.showCaption = true
         return
       }
@@ -128,7 +128,14 @@ export default {
       const opts = optsResponse.data
       this.currentChallenge = opts.challenge
 
-      const authCredResponse = await startAuthentication(opts)
+      let authCredResponse
+      try {
+        authCredResponse = await startAuthentication(opts)
+      } catch (e) {
+        this.tableCaptionDetails.content = e.message
+        this.showCaption = true
+        return
+      }
 
       try {
         const verificationResp = await this.$axios('/auth/verify-authentication', {

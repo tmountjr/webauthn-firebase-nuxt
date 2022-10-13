@@ -5,7 +5,7 @@ import Cookies from 'universal-cookie'
 /** Exclude some paths from processing */
 const include = [
   '/',
-  // '/credential-manager',
+  '/credential-manager',
   '/profile',
   '/settings'
 ]
