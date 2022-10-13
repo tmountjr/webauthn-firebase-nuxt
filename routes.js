@@ -118,8 +118,8 @@ module.exports = new Router()
             counter,
             transports: credential.transports
           }
+          newDevice.credentialIdSerialized = base64url.encode(credentialID)
           returnValue.newDevice = newDevice
-          returnValue.credentialIdSerialized = base64url.encode(credentialID)
         }
       }
 

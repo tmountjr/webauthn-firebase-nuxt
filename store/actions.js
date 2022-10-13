@@ -31,7 +31,7 @@ export default {
 
     // Update the list, or if it will be empty after removing credId, delete it.
     const fbUid = state.authUser.uid
-    const credentials = state.credentials.filter(cred => cred.credId !== credId)
+    const credentials = state.credentials.filter(cred => cred.credentialIdSerialized !== credId)
     const ref = this.$fire.database.ref(`users/${fbUid}/credentials`)
     if (credentials.length > 0) {
       await ref.set(credentials)

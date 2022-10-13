@@ -23,19 +23,19 @@
       <b-col>
         <b-table head-variant="dark" :items="credentials" :fields="fields">
           <template #cell(credId)="data">
-            {{ data.value?.slice(0, 8) }}...
+            {{ data.item.credentialIdSerialized.slice(0, 8) }}...
           </template>
           <template #cell(inUse)="data">
-            {{ data.item.credId === defaultCredId ? '✓' : '' }}
+            {{ data.item.credentialIdSerialized === defaultCredId ? '✓' : '' }}
           </template>
           <template #cell(actions)="data">
-            <b-button @click.prevent="setLocalCredId(data.item.credId)">
+            <b-button @click.prevent="setLocalCredId(data.item.credentialIdSerialized)">
               Use
             </b-button>
-            <b-button @click.prevent="testCredential(data.item.credId)">
+            <b-button @click.prevent="testCredential(data.item.credentialIdSerialized)">
               Test
             </b-button>
-            <b-button variant="danger" @click.prevent="deleteCredential(data.item.credId)">
+            <b-button variant="danger" @click.prevent="deleteCredential(data.item.credentialIdSerialized)">
               Delete
             </b-button>
           </template>
@@ -75,12 +75,12 @@ export default {
       credentials: state => state.credentials
     }),
     credInUse (credId) {
-      const defaultCred = window.localStorage.getItem('credId')
+      const defaultCred = window.localStorage.getItem('activeCredential')
       return defaultCred === credId
     }
   },
   beforeMount () {
-    this.defaultCredId = window.localStorage.getItem('credId')
+    this.defaultCredId = window.localStorage.getItem('activeCredential')
   },
   methods: {
     ...mapActions({
@@ -92,7 +92,7 @@ export default {
       this.tableCaptionDetails.content = ''
     },
     setLocalCredId (credId) {
-      window.localStorage.setItem('credId', credId)
+      window.localStorage.setItem('activeCredential', credId)
       this.tableCaptionDetails.errorLevel = 'success'
       this.tableCaptionDetails.content = 'Successfully linked local credential. Please test it if you haven\'t yet.'
       this.showCaption = true
@@ -101,9 +101,9 @@ export default {
       await this.deleteFirebaseCredential(credId)
 
       // Check local storage too, just to make sure
-      const localCredId = window.localStorage.getItem('credId')
+      const localCredId = window.localStorage.getItem('activeCredential')
       if (credId === localCredId) {
-        window.localStorage.removeItem('credId')
+        window.localStorage.removeItem('activeCredential')
       }
     },
     async testCredential (credId) {

@@ -121,8 +121,10 @@ export default {
         }
       })
 
-      const { verified, newDevice, credentialIdSerialized } = verificationResp.data
+      const { verified, newDevice } = verificationResp.data
+      const { credentialIdSerialized } = newDevice
       if (verified) {
+        newDevice.credentialName = this.newCredentialName
         window.localStorage.setItem('activeCredential', credentialIdSerialized)
         await this.createCredential(newDevice)
         this.captionDetails.errorLevel = 'success'
@@ -131,6 +133,7 @@ export default {
         this.captionDetails.content = 'Unable to register device.'
       }
       this.showCaption = true
+      this.newCredentialName = ''
     },
     resetMiniAlert () {
       this.showCaption = false
