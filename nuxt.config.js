@@ -81,7 +81,8 @@ const config = {
 
   serverMiddleware: [
     '@/server-middleware/redirects.js',
-    '@/server-middleware/verifyFirebase.js'
+    '@/server-middleware/verifyFirebase.js',
+    { path: '/schwarber', handler: '@server-middleware/schwarber.js' }
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
