@@ -42,7 +42,6 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { startRegistration } from '@simplewebauthn/browser'
 
 export default {
   name: 'AddCredentialComponent',
@@ -80,6 +79,8 @@ export default {
       createCredential: 'createCredential'
     }),
     async startRegisterCredential () {
+      const { startRegistration } = await import('@simplewebauthn/browser')
+
       let attResp
       try {
         const optsResponse = await this.$axios('/auth/generate-registration-options', {

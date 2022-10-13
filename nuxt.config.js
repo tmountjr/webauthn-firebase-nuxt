@@ -90,9 +90,6 @@ const config = {
       compact: process.env.NODE_ENV !== 'development',
       sourceRoot: __dirname
     },
-    transpile: [
-      '@simplewebauthn/browser'
-    ],
     extend (config, { isClient, isServer }) {
       if (process.env.NODE_ENV !== 'development') {
         config.devtool = isClient ? 'source-map' : 'inline-source-map'

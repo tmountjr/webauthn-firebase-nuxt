@@ -52,7 +52,6 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { startAuthentication } from '@simplewebauthn/browser'
 
 export default {
   name: 'CredentialPickerComponent',
@@ -108,6 +107,8 @@ export default {
       }
     },
     async testCredential (credId) {
+      const { startAuthentication } = await import('@simplewebauthn/browser')
+
       let optsResponse
       try {
         optsResponse = await this.$axios('/auth/generate-authentication-options', {
