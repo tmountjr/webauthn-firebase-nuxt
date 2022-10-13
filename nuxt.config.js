@@ -1,7 +1,3 @@
-import fs from 'fs'
-import path from 'path'
-import webpack from 'webpack'
-
 const config = {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -118,6 +114,8 @@ const config = {
 }
 
 // if ('LOCALHOST_HTTPS_CERT' in process.env && 'LOCALHOST_HTTPS_KEY' in process.env) {
+//   const fs = require('fs')
+//   const path = require('path')
 //   config.server = {
 //     https: {
 //       key: fs.readFileSync(path.resolve(__dirname, process.env.LOCALHOST_HTTPS_KEY)),
