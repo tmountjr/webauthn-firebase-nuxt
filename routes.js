@@ -1,7 +1,7 @@
 // This file was added by layer0 init.
 // You should commit this file to source control.
 
-import { generateRegistrationOptions, verifyRegistrationResponse } from '@simplewebauthn/server'
+import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthenticationResponse, verifyRegistrationResponse } from '@simplewebauthn/server'
 import base64url from 'base64url'
 
 const { Router } = require('@layer0/core/router')
@@ -31,6 +31,35 @@ module.exports = new Router()
 
   .match('/service-worker.js', ({ serviceWorker }) => {
     serviceWorker('.nuxt/dist/client/service-worker.js')
+  })
+
+  .post('/auth/generate-authentication-options', ({ cache, compute }) => {
+    cache(NO_CACHE)
+
+    compute((req, res) => {
+      const { devices } = JSON.parse(req.body)
+      const opts = {
+        timeout: 60000,
+        allowCredentials: devices.map(dev => ({
+          id: dev.credentialID,
+          type: 'public-key',
+          transports: dev.transports
+        })),
+        userVerification: 'required',
+        rpID
+      }
+
+      res.setHeader('content-type', 'application/json')
+      try {
+        const options = generateAuthenticationOptions(opts)
+        res.statusCode = 200
+        res.body = JSON.stringify(options)
+      } catch (e) {
+        res.statusCode = 400
+        res.body = JSON.stringify({ error: e.message })
+      }
+      return res
+    })
   })
 
   .post('/auth/generate-registration-options', ({ cache, compute }) => {
@@ -69,6 +98,67 @@ module.exports = new Router()
       // `options` has the challenge embedded in it; the client will need to take
       // the challenge and push it to firebase
       return res
+    })
+  })
+
+  .post('/auth/verify-authentication', ({ compute }) => {
+    compute(async (req, res) => {
+      res.setHeader('content-type', 'application/json')
+
+      const { devices, currentChallenge, body } = JSON.parse(req.body)
+      devices.forEach((device) => {
+        for (const prop in device) {
+          if (
+            typeof device[prop] === 'object' &&
+            'type' in device[prop] &&
+            device[prop].type === 'Buffer'
+          ) {
+            device[prop] = Buffer.from(device[prop].data)
+          }
+        }
+      })
+
+      const expectedChallenge = currentChallenge
+      let dbAuthenticator
+      const bodyCredIdBuffer = base64url.toBuffer(body.rawId)
+      for (const dev of devices) {
+        if (dev.credentialID.equals(bodyCredIdBuffer)) {
+          dbAuthenticator = dev
+          break
+        }
+      }
+
+      if (!dbAuthenticator) {
+        res.statusCode = 400
+        res.body = JSON.stringify({ error: 'Authenticator is not registered with this site.' })
+        return res
+      }
+
+      let verification
+      try {
+        const opts = {
+          credential: body,
+          expectedChallenge: `${expectedChallenge}`,
+          expectedOrigin,
+          expectedRPID: rpID,
+          authenticator: dbAuthenticator,
+          requireUserVerification: true
+        }
+        verification = await verifyAuthenticationResponse(opts)
+      } catch (e) {
+        res.statusCode = 400
+        res.body = JSON.stringify({ error: e.message })
+        return res
+      }
+
+      const { verified, authenticationInfo } = verification
+      const returnValue = { verified }
+      if (verified) {
+        dbAuthenticator.counter = authenticationInfo.newCounter
+        returnValue.authenticator = dbAuthenticator
+      }
+
+      res.body = JSON.stringify(returnValue)
     })
   })
 

@@ -52,7 +52,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-import { signinRequest, signinResponse } from '@/lib/auth'
+import { startAuthentication } from '@simplewebauthn/browser'
 
 export default {
   name: 'CredentialPickerComponent',
@@ -68,7 +68,8 @@ export default {
       errorLevel: 'danger',
       content: ''
     },
-    defaultCredId: ''
+    defaultCredId: '',
+    currentChallenge: ''
   }),
   computed: {
     ...mapState({
@@ -107,21 +108,43 @@ export default {
       }
     },
     async testCredential (credId) {
-      const options = signinRequest({
-        user: { ...this.authUser, credentials: this.credentials },
-        credId
-      })
+      let optsResponse
+      try {
+        optsResponse = await this.$axios('/auth/generate-authentication-options', {
+          method: 'POST',
+          data: {
+            devices: this.credentials.filter(cred => cred.credentialIdSerialized === credId)
+          },
+          headers: {
+            'content-type': 'application/json'
+          }
+        })
+      } catch (e) {
+        this.captionDetails.content = e.message
+        this.showCaption = true
+        return
+      }
 
-      const cred = await window.navigator.credentials.get({
-        publicKey: options
-      })
+      const opts = optsResponse.data
+      this.currentChallenge = opts.challenge
+
+      const authCredResponse = await startAuthentication(opts)
 
       try {
-        const success = await signinResponse({
-          user: { ...this.authUser, credentials: this.credentials },
-          rawCredential: cred
+        const verificationResp = await this.$axios('/auth/verify-authentication', {
+          method: 'POST',
+          data: {
+            devices: this.credentials,
+            currentChallenge: this.currentChallenge,
+            body: authCredResponse
+          },
+          headers: {
+            'content-type': 'application/json'
+          }
         })
-        if (success) {
+
+        const { verified } = verificationResp.data
+        if (verified) {
           this.tableCaptionDetails.errorLevel = 'success'
           this.tableCaptionDetails.content = 'Successfully validated credential.'
         } else {
