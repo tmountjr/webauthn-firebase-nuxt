@@ -23,6 +23,7 @@
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/firebase": "^8.2.2",
     "@simplewebauthn/server": "5.2.0",
+    "parse-url": "^8",
     "universal-cookie": "^4.0.4",
     "url-parse": "^1.5.10"
   },
