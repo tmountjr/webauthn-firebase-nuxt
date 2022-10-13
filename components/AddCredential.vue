@@ -106,6 +106,7 @@ export default {
         attResp = await startRegistration(opts)
       } catch (e) {
         this.captionDetails.content = e.message
+        this.captionDetails.errorLevel = 'danger'
         this.showCaption = true
         return
       }
@@ -131,6 +132,7 @@ export default {
         this.captionDetails.errorLevel = 'success'
         this.captionDetails.content = 'Successfully registered device!'
       } else {
+        this.captionDetails.errorLevel = 'danger'
         this.captionDetails.content = 'Unable to register device.'
       }
       this.showCaption = true
@@ -140,6 +142,7 @@ export default {
       this.showCaption = false
       this.captionDetails.errorLevel = 'danger'
       this.captionDetails.content = ''
+      this.showCaption = false
     }
   }
 }

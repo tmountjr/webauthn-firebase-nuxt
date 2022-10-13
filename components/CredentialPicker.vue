@@ -90,6 +90,7 @@ export default {
       this.showCaption = false
       this.tableCaptionDetails.errorLevel = 'danger'
       this.tableCaptionDetails.content = ''
+      this.showCaption = false
     },
     setLocalCredId (credId) {
       window.localStorage.setItem('activeCredential', credId)
@@ -122,6 +123,7 @@ export default {
         })
       } catch (e) {
         this.tableCaptionDetails.content = e.message
+        this.tableCaptionDetails.errorLevel = 'danger'
         this.showCaption = true
         return
       }
@@ -134,6 +136,7 @@ export default {
         authCredResponse = await startAuthentication(opts)
       } catch (e) {
         this.tableCaptionDetails.content = e.message
+        this.tableCaptionDetails.errorLevel = 'danger'
         this.showCaption = true
         return
       }
