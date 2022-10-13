@@ -98,3 +98,4 @@ authCreds.json
 *.pem
 # Layer0 generated build directory
 .layer0
+getNodeModules.js
