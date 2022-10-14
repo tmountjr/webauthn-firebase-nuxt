@@ -5,7 +5,9 @@ const setNodeModules = async () => {
   // Enter an entry point to the app, for example in Nuxt(2), the whole app inside core.js
   const files = [
     './node_modules/@nuxt/core/dist/core.js',
-    './server-middleware/schwarber.js'
+    './server-middleware/schwarber.js',
+    './server-middleware/redirects.js',
+    './server-middleware/verifyFirebase.js'
   ]
   // Compute file trace
   const { fileList } = await nodeFileTrace(files)
