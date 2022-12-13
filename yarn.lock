@@ -1701,6 +1701,11 @@
   dependencies:
     eslint-scope "5.1.1"
 
+"@noble/ed25519@^1.6.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@noble/ed25519/-/ed25519-1.7.1.tgz#6899660f6fbb97798a6fbd227227c4589a454724"
+  integrity sha512-Rk4SkJFaXZiznFyC/t77Q0NKS4FL7TLJJsVG2V2oiEq3kJVeTdxysEe/yRWSpnWMe808XRDJ+VFh5pt/FN5plw==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"
@@ -2233,33 +2238,26 @@
     estree-walker "^1.0.1"
     picomatch "^2.2.2"
 
-"@simplewebauthn/browser@^6.2.1":
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/@simplewebauthn/browser/-/browser-6.2.1.tgz#e17acdb5a91111001cfbd9071fd4b187db7fe374"
-  integrity sha512-SxP+miOdM55rj43OdoHcIP3GCeOjIa2g49CDLnpx/HBRRTLBfBr9Bt8JVxKqxOPuR2ctnIuCotoWX5j6k4B+dA==
+"@simplewebauthn/browser@^6.2":
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/@simplewebauthn/browser/-/browser-6.2.2.tgz#3cd773a9887734331251d1b8dec043547a7bbd57"
+  integrity sha512-VUtne7+s6BmW4usnbitjZEI1VNT/PNh6bYg+AI4OMdfpo5z+yAq+6iVAWBJlIUGVk5InetEQvTUp6OefBam8qg==
 
-"@simplewebauthn/server@5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@simplewebauthn/server/-/server-5.2.0.tgz#a5451acafe32b6d0c87625a962b5cb7d8218508f"
-  integrity sha512-JRbmWodU64Abto4LSopOmIHKz5LydWzE1EzeIsx+EEY+DYJa6Xq3hzAbwaTbcUKgA+mITofonvHgJYP3rmPwVA==
+"@simplewebauthn/server@^6.2":
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/@simplewebauthn/server/-/server-6.2.2.tgz#d3f03ef5e1baf3dd53efbd50737e2abdb5530a85"
+  integrity sha512-c7vM8rocz9N5ndaWpu9nOmKQVF7PXd4/R620klVAAoP7UQJwOpGJKSmIOdmg87lNMMk5/V38Mp/5g6kYz34+0g==
   dependencies:
+    "@noble/ed25519" "^1.6.1"
     "@peculiar/asn1-android" "^2.1.7"
     "@peculiar/asn1-schema" "^2.1.7"
     "@peculiar/asn1-x509" "^2.1.7"
-    "@simplewebauthn/typescript-types" "^5.2.0"
     base64url "^3.0.1"
     cbor "^5.1.0"
     debug "^4.3.2"
-    elliptic "^6.5.3"
     jsrsasign "^10.4.0"
     jwk-to-pem "^2.0.4"
     node-fetch "^2.6.0"
-    node-rsa "^1.1.1"
-
-"@simplewebauthn/typescript-types@^5.2.0":
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/@simplewebauthn/typescript-types/-/typescript-types-5.4.0.tgz#533b28e7cabcc092396ecd07bbb953b71e7696b6"
-  integrity sha512-LeJq6Jx+o7D6iIlCy8CH5jCjwVcUvAReEo66VcF3nysfc/yKW5yCAPLSRmPITF4CRZTfnVPxUBUcveUQL6aBMA==
 
 "@surma/rollup-plugin-off-main-thread@^1.1.1":
   version "1.4.2"
@@ -3064,13 +3062,6 @@ asn1.js@^5.2.0, asn1.js@^5.3.0:
     inherits "^2.0.1"
     minimalistic-assert "^1.0.0"
     safer-buffer "^2.1.0"
-
-asn1@^0.2.4:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/asn1/-/asn1-0.2.6.tgz#0d3a7bb6e64e02a90c0303b31f292868ea09a08d"
-  integrity sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ==
-  dependencies:
-    safer-buffer "~2.1.0"
 
 asn1js@^3.0.5:
   version "3.0.5"
@@ -8223,13 +8214,6 @@ node-res@^5.0.1:
     on-finished "^2.3.0"
     vary "^1.1.2"
 
-node-rsa@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/node-rsa/-/node-rsa-1.1.1.tgz#efd9ad382097782f506153398496f79e4464434d"
-  integrity sha512-Jd4cvbJMryN21r5HgxQOpMEqv+ooke/korixNNK3mGqfGJmy0M77WDDzo/05969+OkMy3XW1UuZsSmW9KQm7Fw==
-  dependencies:
-    asn1 "^0.2.4"
-
 nofilter@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/nofilter/-/nofilter-1.0.4.tgz#78d6f4b6a613e7ced8b015cec534625f7667006e"
@@ -10267,7 +10251,7 @@ safe-regex@^2.1.1:
   dependencies:
     regexp-tree "~0.1.1"
 
-"safer-buffer@>= 2.1.2 < 3", safer-buffer@^2.1.0, safer-buffer@~2.1.0:
+"safer-buffer@>= 2.1.2 < 3", safer-buffer@^2.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==

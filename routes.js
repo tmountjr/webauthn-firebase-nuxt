@@ -1,11 +1,15 @@
-// This file was added by layer0 init.
-// You should commit this file to source control.
-
-import { generateAuthenticationOptions, generateRegistrationOptions, verifyAuthenticationResponse, verifyRegistrationResponse } from '@simplewebauthn/server'
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+  verifyRegistrationResponse
+} from '@simplewebauthn/server'
 import base64url from 'base64url'
+import firebaseAdmin from 'firebase-admin'
 
 const { Router } = require('@layer0/core/router')
 const { nuxtRoutes } = require('@layer0/nuxt')
+const axios = require('axios')
 
 const NO_CACHE = {
   browser: {
@@ -18,12 +22,43 @@ const NO_CACHE = {
   }
 }
 
-const { RP_ID } = process.env
+const { FIREBASE_DATABASE_URL, RP_ID } = process.env
 const rpID = RP_ID
 const expectedOrigin = rpID === 'localhost'
   ? 'http://localhost:3000'
   : `https://${rpID}`
 const rpName = 'Webauthn / Firebase / Nuxt Demo'
+
+/**
+ * Get a list of available credentials for a given Firebase UID
+ * @param {string} fbUid The Firebase UID of the user to fetch
+ * @returns {Promise<any[]>} A list of available credentials for the user
+ */
+const userDevices = async (fbUid) => {
+  const resp = await axios.get(`${FIREBASE_DATABASE_URL}/users/${fbUid}/credentials.json`)
+  const devices = convertFirebaseDevices(resp.data)
+  return devices
+}
+
+/**
+ * Processes a list of Firebase devices by converting pseudo-buffers to actual buffers.
+ * @param {any[]} devices The list of devices to process
+ * @returns {any[]} The same list, processed.
+ */
+const convertFirebaseDevices = (devices) => {
+  devices.forEach((device) => {
+    for (const prop in device) {
+      if (
+        typeof device[prop] === 'object' &&
+        'type' in device[prop] &&
+        device[prop].type === 'Buffer'
+      ) {
+        device[prop] = Buffer.from(device[prop].data)
+      }
+    }
+  })
+  return devices
+}
 
 module.exports = new Router()
   // Prevent search engines from indexing permalink URLs
@@ -33,11 +68,42 @@ module.exports = new Router()
     serviceWorker('.nuxt/dist/client/service-worker.js')
   })
 
+  .get('/auth/generate-authentication-options', ({ cache, compute }) => {
+    cache(NO_CACHE)
+
+    compute((_req, res) => {
+      const opts = {
+        timeout: 60000,
+        allowCredentials: [],
+        userVerification: 'preferred',
+        rpID
+      }
+      res.setHeader('content-type', 'application/json')
+      try {
+        const options = generateAuthenticationOptions(opts)
+        res.statusCode = 200
+        res.body = JSON.stringify(options)
+      } catch (e) {
+        res.statusCode = 400
+        res.body = JSON.stringify({ error: e.message })
+      }
+      return res
+    })
+  })
+
   .post('/auth/generate-authentication-options', ({ cache, compute }) => {
     cache(NO_CACHE)
 
-    compute((req, res) => {
-      const { devices } = JSON.parse(req.body)
+    compute(async (req, res) => {
+      const jsonBody = JSON.parse(req.body)
+      let { devices } = jsonBody
+      const { fbUid } = jsonBody
+      if (devices) {
+        devices = convertFirebaseDevices(devices)
+      } else {
+        devices = await userDevices(fbUid)
+      }
+
       const opts = {
         timeout: 60000,
         allowCredentials: devices.map(dev => ({
@@ -45,7 +111,7 @@ module.exports = new Router()
           type: 'public-key',
           transports: dev.transports
         })),
-        userVerification: 'required',
+        userVerification: 'preferred',
         rpID
       }
 
@@ -80,7 +146,7 @@ module.exports = new Router()
           transports: dev.transports
         })),
         authenticatorSelection: {
-          userVerification: 'required',
+          userVerification: 'preferred',
           residentKey: 'required'
         },
         supportedAlgorithmIDs: [-7, -257]
@@ -105,18 +171,14 @@ module.exports = new Router()
     compute(async (req, res) => {
       res.setHeader('content-type', 'application/json')
 
-      const { devices, currentChallenge, body } = JSON.parse(req.body)
-      devices.forEach((device) => {
-        for (const prop in device) {
-          if (
-            typeof device[prop] === 'object' &&
-            'type' in device[prop] &&
-            device[prop].type === 'Buffer'
-          ) {
-            device[prop] = Buffer.from(device[prop].data)
-          }
-        }
-      })
+      const jsonBody = JSON.parse(req.body)
+      const { fbUid, currentChallenge, body, withToken = false } = jsonBody
+      let { devices } = jsonBody
+      if (devices) {
+        devices = convertFirebaseDevices(devices)
+      } else {
+        devices = await userDevices(fbUid)
+      }
 
       const expectedChallenge = currentChallenge
       let dbAuthenticator
@@ -156,6 +218,23 @@ module.exports = new Router()
       if (verified) {
         dbAuthenticator.counter = authenticationInfo.newCounter
         returnValue.authenticator = dbAuthenticator
+
+        if (withToken) {
+          let adminApp
+          try {
+            adminApp = firebaseAdmin.app('firebase-admin-app')
+          } catch (e) {
+            const creds = JSON.parse(process.env.GAPP_CREDENTIALS)
+            creds.private_key = creds.private_key.replace(/\\n/gm, '\n')
+            adminApp = firebaseAdmin.initializeApp({
+              credential: firebaseAdmin.credential.cert(creds),
+              databaseURL: FIREBASE_DATABASE_URL
+            }, 'firebase-admin-app')
+          }
+          const auth = adminApp.auth()
+          const token = await auth.createCustomToken(fbUid)
+          returnValue.loginToken = token
+        }
       }
 
       res.body = JSON.stringify(returnValue)
@@ -200,6 +279,12 @@ module.exports = new Router()
       const returnValue = { verified }
       if (verified && registrationInfo) {
         const { credentialPublicKey, credentialID, counter } = registrationInfo
+        const passkey = {
+          credentialDeviceType: registrationInfo.credentialDeviceType,
+          credentialBackedUp: registrationInfo.credentialBackedUp
+        }
+        // eslint-disable-next-line no-console
+        console.log(passkey)
         const existingDevice = devices.find(device => device.credentialID.equals(credentialID))
         if (!existingDevice) {
           const newDevice = {
