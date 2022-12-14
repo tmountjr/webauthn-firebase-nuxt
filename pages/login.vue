@@ -146,7 +146,7 @@ export default {
         optsResponse = await this.$axios('/auth/generate-authentication-options', {
           method: 'POST',
           data: {
-            fbUid
+            fbUid: fbUid || this.authUser.uid
           },
           headers: {
             'content-type': 'application/json'
@@ -176,7 +176,7 @@ export default {
           data: {
             currentChallenge,
             body: authCredResponse,
-            fbUid,
+            fbUid: fbUid || this.authUser.uid,
             withToken: true
           },
           headers: {

@@ -246,18 +246,9 @@ module.exports = new Router()
       res.setHeader('content-type', 'application/json')
 
       const body = JSON.parse(req.body)
-      const { credential, devices, expectedChallenge } = body
-      devices.forEach((device) => {
-        for (const prop in device) {
-          if (
-            typeof device[prop] === 'object' &&
-            'type' in device[prop] &&
-            device[prop].type === 'Buffer'
-          ) {
-            device[prop] = Buffer.from(device[prop].data)
-          }
-        }
-      })
+      const { credential, expectedChallenge } = body
+      let { devices } = body
+      devices = convertFirebaseDevices(devices)
 
       let verification
       try {
@@ -279,12 +270,6 @@ module.exports = new Router()
       const returnValue = { verified }
       if (verified && registrationInfo) {
         const { credentialPublicKey, credentialID, counter } = registrationInfo
-        const passkey = {
-          credentialDeviceType: registrationInfo.credentialDeviceType,
-          credentialBackedUp: registrationInfo.credentialBackedUp
-        }
-        // eslint-disable-next-line no-console
-        console.log(passkey)
         const existingDevice = devices.find(device => device.credentialID.equals(credentialID))
         if (!existingDevice) {
           const newDevice = {
