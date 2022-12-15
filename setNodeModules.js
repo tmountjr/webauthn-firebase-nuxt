@@ -7,7 +7,8 @@ const setNodeModules = async () => {
     './node_modules/@nuxt/core/dist/core.js',
     './server-middleware/schwarber.js',
     './server-middleware/redirects.js',
-    './server-middleware/verifyFirebase.js'
+    './server-middleware/verifyFirebase.js',
+    './fbAdminApp.js'
   ]
   // Compute file trace
   const { fileList } = await nodeFileTrace(files)

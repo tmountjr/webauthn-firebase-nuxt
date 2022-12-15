@@ -5,11 +5,10 @@ import {
   verifyRegistrationResponse
 } from '@simplewebauthn/server'
 import base64url from 'base64url'
-import firebaseAdmin from 'firebase-admin'
+import { fbAdminApp, userDevices, convertFirebaseDevices } from './fbAdminApp.js'
 
 const { Router } = require('@layer0/core/router')
 const { nuxtRoutes } = require('@layer0/nuxt')
-const axios = require('axios')
 
 const NO_CACHE = {
   browser: {
@@ -22,43 +21,12 @@ const NO_CACHE = {
   }
 }
 
-const { FIREBASE_DATABASE_URL, RP_ID } = process.env
+const { RP_ID } = process.env
 const rpID = RP_ID
 const expectedOrigin = rpID === 'localhost'
   ? 'http://localhost:3000'
   : `https://${rpID}`
 const rpName = 'Webauthn / Firebase / Nuxt Demo'
-
-/**
- * Get a list of available credentials for a given Firebase UID
- * @param {string} fbUid The Firebase UID of the user to fetch
- * @returns {Promise<any[]>} A list of available credentials for the user
- */
-const userDevices = async (fbUid) => {
-  const resp = await axios.get(`${FIREBASE_DATABASE_URL}/users/${fbUid}/credentials.json`)
-  const devices = convertFirebaseDevices(resp.data)
-  return devices
-}
-
-/**
- * Processes a list of Firebase devices by converting pseudo-buffers to actual buffers.
- * @param {any[]} devices The list of devices to process
- * @returns {any[]} The same list, processed.
- */
-const convertFirebaseDevices = (devices) => {
-  devices.forEach((device) => {
-    for (const prop in device) {
-      if (
-        typeof device[prop] === 'object' &&
-        'type' in device[prop] &&
-        device[prop].type === 'Buffer'
-      ) {
-        device[prop] = Buffer.from(device[prop].data)
-      }
-    }
-  })
-  return devices
-}
 
 module.exports = new Router()
   // Prevent search engines from indexing permalink URLs
@@ -220,17 +188,7 @@ module.exports = new Router()
         returnValue.authenticator = dbAuthenticator
 
         if (withToken) {
-          let adminApp
-          try {
-            adminApp = firebaseAdmin.app('firebase-admin-app')
-          } catch (e) {
-            const creds = JSON.parse(process.env.GAPP_CREDENTIALS)
-            creds.private_key = creds.private_key.replace(/\\n/gm, '\n')
-            adminApp = firebaseAdmin.initializeApp({
-              credential: firebaseAdmin.credential.cert(creds),
-              databaseURL: FIREBASE_DATABASE_URL
-            }, 'firebase-admin-app')
-          }
+          const adminApp = fbAdminApp()
           const auth = adminApp.auth()
           const token = await auth.createCustomToken(fbUid)
           returnValue.loginToken = token
