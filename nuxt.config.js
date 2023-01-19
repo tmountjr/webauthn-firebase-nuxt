@@ -31,7 +31,7 @@ const config = {
   buildModules: [
     // https://go.nuxtjs.dev/eslint
     '@nuxtjs/eslint-module',
-    ['@layer0/nuxt/module', {
+    ['@edgio/nuxt/module', {
       layer0SourceMaps: true
     }],
 

@@ -7,8 +7,8 @@ import {
 import base64url from 'base64url'
 import { fbAdminApp, userDevices, convertFirebaseDevices } from './fbAdminApp.js'
 
-const { Router } = require('@layer0/core/router')
-const { nuxtRoutes } = require('@layer0/nuxt')
+const { Router } = require('@edgio/core/router')
+const { nuxtRoutes } = require('@edgio/nuxt')
 
 const NO_CACHE = {
   browser: {

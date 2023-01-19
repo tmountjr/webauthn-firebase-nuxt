@@ -1,6 +1,6 @@
 'use strict'
 module.exports = {
-  connector: '@layer0/nuxt',
+  connector: '@edgio/nuxt',
   includeFiles: require('./getNodeModules.js'),
   includeNodeModules: true
 }
