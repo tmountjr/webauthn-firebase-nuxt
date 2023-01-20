@@ -31,12 +31,12 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "server: layer0",
+      "name": "server: edgio",
       "args": ["dev"],
       "envFile": "${workspaceFolder}/.env",
-      "runtimeVersion": "14",
+      "runtimeVersion": "16",
       "osx": {
-        "program": "${workspaceFolder}/node_modules/.bin/0",
+        "program": "${workspaceFolder}/node_modules/.bin/edg",
         "args": ["dev"]
       }
     },
@@ -44,7 +44,7 @@
   "compounds": [
     {
       "name": "fullstack: nuxt",
-      "configurations": ["server: layer0", "client: chrome"]
+      "configurations": ["server: edgio", "client: chrome"]
     }
   ]
 }

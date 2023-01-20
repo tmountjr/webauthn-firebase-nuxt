@@ -28,10 +28,9 @@ const expectedOrigin = rpID === 'localhost'
   : `https://${rpID}`
 const rpName = 'Webauthn / Firebase / Nuxt Demo'
 
-module.exports = new Router()
-  // Prevent search engines from indexing permalink URLs
-  .noIndexPermalink()
-
+module.exports = new Router({
+  indexPermalink: false
+})
   .match('/service-worker.js', ({ serviceWorker }) => {
     serviceWorker('.nuxt/dist/client/service-worker.js')
   })
@@ -167,7 +166,7 @@ module.exports = new Router()
       let verification
       try {
         const opts = {
-          credential: body,
+          response: body,
           expectedChallenge: `${expectedChallenge}`,
           expectedOrigin,
           expectedRPID: rpID,
@@ -211,7 +210,7 @@ module.exports = new Router()
       let verification
       try {
         const opts = {
-          credential,
+          response: credential,
           expectedChallenge,
           expectedOrigin,
           expectedRPID: rpID,
@@ -227,8 +226,9 @@ module.exports = new Router()
       const { verified, registrationInfo } = verification
       const returnValue = { verified }
       if (verified && registrationInfo) {
-        const { credentialPublicKey, credentialID, counter } = registrationInfo
-        const existingDevice = devices.find(device => device.credentialID.equals(credentialID))
+        const { credentialPublicKey, counter } = registrationInfo
+        const credentialID = Buffer.from(registrationInfo.credentialID)
+        const existingDevice = devices.find(device => Buffer.from(device.credentialID).equals(credentialID))
         if (!existingDevice) {
           const newDevice = {
             credentialPublicKey,
@@ -236,7 +236,7 @@ module.exports = new Router()
             counter,
             transports: credential.transports
           }
-          newDevice.credentialIdSerialized = base64url.encode(credentialID)
+          newDevice.credentialIdSerialized = base64url.encode(registrationInfo.credentialID)
           returnValue.newDevice = newDevice
         }
       }
