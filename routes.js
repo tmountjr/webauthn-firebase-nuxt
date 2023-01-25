@@ -5,6 +5,7 @@ import {
   verifyRegistrationResponse
 } from '@simplewebauthn/server'
 import base64url from 'base64url'
+import { isoBase64URL } from '@simplewebauthn/server/helpers'
 import { fbAdminApp, userDevices, convertFirebaseDevices } from './fbAdminApp.js'
 
 const { Router } = require('@edgio/core/router')
@@ -149,7 +150,7 @@ module.exports = new Router({
 
       const expectedChallenge = currentChallenge
       let dbAuthenticator
-      const bodyCredIdBuffer = base64url.toBuffer(body.rawId)
+      const bodyCredIdBuffer = isoBase64URL.toBuffer(body.rawId)
       for (const dev of devices) {
         if (dev.credentialID.equals(bodyCredIdBuffer)) {
           dbAuthenticator = dev
