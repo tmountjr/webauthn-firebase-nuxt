@@ -53,6 +53,10 @@ export const convertFirebaseDevices = (devices) => {
         device[prop] = Buffer.from(device[prop].data)
       }
     }
+    // For v7 devices, convert the public key array back into a Buffer.
+    if (Array.isArray(device.credentialPublicKey)) {
+      device.credentialPublicKey = Buffer.from(device.credentialPublicKey)
+    }
   })
   return devices
 }
