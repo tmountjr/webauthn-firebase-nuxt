@@ -38,7 +38,7 @@ export const userDevices = async (fbUid) => {
 }
 
 /**
- * Processes a list of Firebase devices by converting pseudo-buffers to actual buffers.
+ * Processes a list of Firebase devices by converting pseudo-types to actual types.
  * @param {any[]} devices The list of devices to process
  * @returns {any[]} The same list, processed.
  */
@@ -51,11 +51,12 @@ export const convertFirebaseDevices = (devices) => {
         device[prop].type === 'Buffer'
       ) {
         device[prop] = Buffer.from(device[prop].data)
+      } else if (Array.isArray(device[prop])) {
+        // Don't convert all arrays, just the int arrays.
+        if (['credentialID', 'credentialPublicKey'].includes(prop)) {
+          device[prop] = Uint8Array.from(device[prop])
+        }
       }
-    }
-    // For v7 devices, convert the public key array back into a Buffer.
-    if (Array.isArray(device.credentialPublicKey)) {
-      device.credentialPublicKey = Buffer.from(device.credentialPublicKey)
     }
   })
   return devices

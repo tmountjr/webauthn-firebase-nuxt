@@ -4,8 +4,7 @@ import {
   verifyAuthenticationResponse,
   verifyRegistrationResponse
 } from '@simplewebauthn/server'
-import base64url from 'base64url'
-import { isoBase64URL } from '@simplewebauthn/server/helpers'
+import { isoBase64URL, isoUint8Array } from '@simplewebauthn/server/helpers'
 import { fbAdminApp, userDevices, convertFirebaseDevices } from './fbAdminApp.js'
 
 const { Router } = require('@edgio/core/router')
@@ -43,7 +42,7 @@ module.exports = new Router({
       const opts = {
         timeout: 60000,
         allowCredentials: [],
-        userVerification: 'preferred',
+        userVerification: 'required',
         rpID
       }
       res.setHeader('content-type', 'application/json')
@@ -74,14 +73,14 @@ module.exports = new Router({
 
       const opts = {
         timeout: 60000,
-        allowCredentials: devices.map(dev => ({
-          id: dev.credentialID,
-          type: 'public-key',
-          transports: dev.transports
-        })),
-        userVerification: 'preferred',
+        userVerification: 'required',
         rpID
       }
+      opts.allowCredentials = devices.map(device => ({
+        id: device.credentialID,
+        type: 'public-key',
+        transports: device.transports
+      }))
 
       res.setHeader('content-type', 'application/json')
       try {
@@ -152,7 +151,7 @@ module.exports = new Router({
       let dbAuthenticator
       const bodyCredIdBuffer = isoBase64URL.toBuffer(body.rawId)
       for (const dev of devices) {
-        if (dev.credentialID.equals(bodyCredIdBuffer)) {
+        if (isoUint8Array.areEqual(dev.credentialID, bodyCredIdBuffer)) {
           dbAuthenticator = dev
           break
         }
@@ -227,17 +226,16 @@ module.exports = new Router({
       const { verified, registrationInfo } = verification
       const returnValue = { verified }
       if (verified && registrationInfo) {
-        const { credentialPublicKey, counter } = registrationInfo
-        const credentialID = Buffer.from(registrationInfo.credentialID)
-        const existingDevice = devices.find(device => Buffer.from(device.credentialID).equals(credentialID))
+        const { credentialPublicKey, credentialID, counter } = registrationInfo
+        const existingDevice = devices.find(device => isoUint8Array.areEqual(device.credentialID, credentialID))
         if (!existingDevice) {
           const newDevice = {
             credentialPublicKey,
             credentialID,
             counter,
-            transports: credential.transports
+            transports: credential.response.transports
           }
-          newDevice.credentialIdSerialized = base64url.encode(registrationInfo.credentialID)
+          newDevice.credentialIdSerialized = isoBase64URL.fromBuffer(registrationInfo.credentialID)
           returnValue.newDevice = newDevice
         }
       }
